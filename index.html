@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="description" content="TradeIntel OS — AI-Powered Global Trade Intelligence Platform">
+<meta name="theme-color" content="#07090d">
+<title>TradeIntel OS — Global Trade Intelligence</title>
+<link rel="manifest" href="#"> <!-- PWA manifest goes here -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   TRADEINTEL OS — MASTER STYLESHEET
+   
+   HOW TO MODIFY:
+   - Colors/theme → Edit :root variables below
+   - Fonts → Edit --font-* variables
+   - Spacing → Edit --space-* variables
+   - Each section has a clear comment header
+   - Components are self-contained — change one, nothing else breaks
+═══════════════════════════════════════════════════════════════ */
+
+/* ── DESIGN TOKENS (change your entire theme here) ── */
+:root {
+  /* Backgrounds */
+  --bg-base:     #07090d;
+  --bg-surface:  #0d1117;
+  --bg-elevated: #131920;
+  --bg-overlay:  #1a2230;
+  --bg-hover:    #222d3e;
+
+  /* Borders */
+  --border-soft:   rgba(255,255,255,0.06);
+  --border-mid:    rgba(255,255,255,0.11);
+  --border-strong: rgba(255,255,255,0.20);
+
+  /* Text */
+  --text-primary:   #dde4ed;
+  --text-secondary: #7d8fa3;
+  --text-muted:     #3d5066;
+  --text-inverse:   #000000;
+
+  /* Brand Colors */
+  --accent:   #00e5b4;
+  --accent-h: #00c49a;
+  --blue:     #0099ff;
+  --amber:    #f59e0b;
+  --red:      #ef4444;
+  --purple:   #a78bfa;
+  --teal:     #2dd4bf;
+  --pink:     #ec4899;
+  --green:    #22c55e;
+
+  /* Agent Colors */
+  --agent-cyber:  #ef4444;
+  --agent-cx:     #0099ff;
+  --agent-data:   #00e5b4;
+  --agent-site:   #a78bfa;
+  --agent-trade:  #f59e0b;
+
+  /* Typography */
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Spacing */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Transitions */
+  --transition: all 0.15s ease;
+}
+
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-sans); cursor: pointer; }
+input, select, textarea { font-family: var(--font-sans); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT SYSTEM
+═══════════════════════════════════════════════════════════════ */
+.app-shell {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+.app-body {
+  display: flex;
+  overflow: hidden;
+  height: 100%;
+}
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-base);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════════════════════ */
+.topbar {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 0 var(--space-md);
+  gap: 0;
+  position: relative;
+  z-index: 100;
+}
+.topbar-logo {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 28px;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+.logo-mark {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+.topbar-nav {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  gap: 0;
+}
+.topbar-nav::-webkit-scrollbar { height: 0; }
+.tnav-item {
+  padding: 0 14px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.tnav-item:hover { color: var(--text-primary); background: rgba(255,255,255,0.02); }
+.tnav-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-left: auto;
+}
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  animation: pulse-anim 2s infinite;
+}
+.pulse.green { background: var(--accent); }
+.pulse.red { background: var(--red); }
+.pulse.amber { background: var(--amber); }
+@keyframes pulse-anim {
+  0% { box-shadow: 0 0 0 0 rgba(0,229,180,0.4); }
+  70% { box-shadow: 0 0 0 6px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--border-mid);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.btn:hover { color: var(--text-primary); background: var(--bg-overlay); }
+.btn-primary { background: var(--accent); color: var(--text-inverse); border-color: var(--accent); font-weight: 600; }
+.btn-primary:hover { background: var(--accent-h); }
+.btn-danger { border-color: rgba(239,68,68,0.3); color: var(--red); }
+.btn-danger:hover { background: rgba(239,68,68,0.08); }
+.plan-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: rgba(0,229,180,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0,229,180,0.25);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TICKER STRIP
+═══════════════════════════════════════════════════════════════ */
+.ticker-strip {
+  height: 26px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-soft);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.ticker-track {
+  display: flex;
+  animation: ticker-scroll 60s linear infinite;
+  white-space: nowrap;
+}
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  border-right: 1px solid var(--border-soft);
+}
+.ticker-label { color: var(--text-muted); }
+.ticker-value { color: var(--text-primary); }
+.ticker-change.up { color: var(--accent); }
+.ticker-change.dn { color: var(--red); }
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SIDEBAR NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+.sb-section { border-bottom: 1px solid var(--border-soft); padding: 8px 0; }
+.sb-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 6px 14px 4px;
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  border-left: 2px solid transparent;
+  transition: var(--transition);
+  background: transparent;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  width: 100%;
+  text-align: left;
+}
+.sb-item:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.sb-item.active { background: rgba(0,229,180,0.05); color: var(--accent); border-left-color: var(--accent); }
+.sb-item svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.7; }
+.sb-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+.sb-count.red { background: rgba(239,68,68,0.15); color: var(--red); }
+.sb-count.green { background: rgba(0,229,180,0.1); color: var(--accent); }
+.sb-count.amber { background: rgba(245,158,11,0.1); color: var(--amber); }
+
+/* ── SIDEBAR FILTERS ── */
+.sb-filter { padding: 8px 12px; border-bottom: 1px solid var(--border-soft); }
+.filter-label { font-size: 9px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+.filter-input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 6px 9px;
+  color: var(--text-primary);
+  font-size: 11px;
+  outline: none;
+  transition: var(--transition);
+}
+.filter-input:focus { border-color: var(--accent); }
+.filter-select {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 6px 9px;
+  color: var(--text-primary);
+  font-size: 11px;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.chip-group { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
+.chip {
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-size: 9px;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-soft);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.chip:hover { border-color: var(--border-mid); color: var(--text-primary); }
+.chip.active { background: rgba(0,229,180,0.08); border-color: rgba(0,229,180,0.25); color: var(--accent); }
+.apply-btn {
+  width: 100%;
+  padding: 7px;
+  background: var(--accent);
+  color: var(--text-inverse);
+  font-weight: 600;
+  font-size: 11px;
+  border: none;
+  border-radius: var(--radius-sm);
+  margin-top: 8px;
+  transition: var(--transition);
+}
+.apply-btn:hover { background: var(--accent-h); }
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE SYSTEM
+═══════════════════════════════════════════════════════════════ */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── PAGE HERO BANDS ── */
+.page-hero {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-soft);
+  padding: var(--space-lg) var(--space-xl) var(--space-md);
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.hero-title { font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+.hero-subtitle { font-size: 12px; color: var(--text-secondary); }
+
+/* ── KPI STRIP ── */
+.kpi-strip { display: grid; gap: 1px; background: var(--border-soft); border-bottom: 1px solid var(--border-soft); }
+.kpi-card { background: var(--bg-surface); padding: 14px 18px; }
+.kpi-label { font-size: 9px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+.kpi-value { font-family: var(--font-mono); font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+.kpi-delta { font-size: 10px; }
+.kpi-delta.up { color: var(--accent); }
+.kpi-delta.dn { color: var(--red); }
+
+/* ── SECTION HEADERS ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg) var(--space-sm);
+}
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--bg-overlay);
+  color: var(--text-muted);
+  border: 1px solid var(--border-soft);
+}
+.section-actions { display: flex; gap: 6px; }
+.icon-btn {
+  padding: 4px 9px;
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.icon-btn:hover { border-color: var(--border-mid); color: var(--text-primary); background: var(--bg-elevated); }
+.icon-btn.accent { color: var(--accent); border-color: rgba(0,229,180,0.3); }
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA TABLES
+═══════════════════════════════════════════════════════════════ */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead { position: sticky; top: 0; z-index: 2; }
+th {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 9px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-soft);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+th:hover { color: var(--text-secondary); }
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 11.5px;
+  vertical-align: middle;
+}
+tr:hover td { background: rgba(255,255,255,0.015); }
+.td-company { font-weight: 500; color: var(--text-primary); cursor: pointer; }
+.td-company:hover { color: var(--accent); }
+.td-mono { font-family: var(--font-mono); color: var(--text-secondary); font-size: 11px; }
+.td-hs { font-family: var(--font-mono); font-size: 10px; color: var(--blue); }
+.td-right { text-align: right; font-family: var(--font-mono); }
+.td-value { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 9px;
+  font-weight: 500;
+}
+.badge-import { background: rgba(0,153,255,0.1); color: var(--blue); border: 1px solid rgba(0,153,255,0.2); }
+.badge-export { background: rgba(0,229,180,0.08); color: var(--accent); border: 1px solid rgba(0,229,180,0.2); }
+.value-bar { height: 3px; background: var(--bg-overlay); border-radius: 2px; margin-top: 3px; }
+.value-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+.row-actions { display: flex; gap: 4px; }
+.row-btn {
+  padding: 2px 7px;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-soft);
+  border-radius: 2px;
+  color: var(--text-secondary);
+  font-size: 9px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.row-btn:hover { color: var(--text-primary); border-color: var(--border-mid); }
+
+/* ── PAGINATION ── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px var(--space-lg);
+  border-top: 1px solid var(--border-soft);
+  background: var(--bg-surface);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.pag-btns { display: flex; gap: 3px; }
+.pag-btn {
+  padding: 4px 9px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.pag-btn:hover { border-color: var(--border-mid); color: var(--text-primary); }
+.pag-btn.active { background: var(--accent); color: var(--text-inverse); border-color: var(--accent); font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════════════
+   CHARTS & ANALYTICS
+═══════════════════════════════════════════════════════════════ */
+.charts-grid { display: grid; gap: 1px; background: var(--border-soft); }
+.chart-panel { background: var(--bg-surface); padding: var(--space-lg); }
+.chart-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+.chart-subtitle { font-size: 10px; color: var(--text-muted); margin-bottom: var(--space-md); }
+.chart-canvas-wrap { position: relative; width: 100%; }
+.heatmap-row { display: grid; grid-template-columns: repeat(52,1fr); gap: 2px; padding: 4px 0; }
+.heatmap-cell { height: 9px; border-radius: 1px; cursor: pointer; }
+.heatmap-cell:hover { opacity: 0.8; }
+.seasonality-bars { display: grid; grid-template-columns: repeat(12,1fr); gap: 3px; }
+.month-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.month-bar-wrap { width: 100%; height: 60px; display: flex; flex-direction: column; justify-content: flex-end; }
+.month-bar { width: 100%; border-radius: 2px 2px 0 0; }
+.month-label { font-family: var(--font-mono); font-size: 8px; color: var(--text-muted); }
+.month-value { font-family: var(--font-mono); font-size: 8px; color: var(--text-secondary); }
+
+/* ═══════════════════════════════════════════════════════════════
+   AI AGENT SYSTEM
+═══════════════════════════════════════════════════════════════ */
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  padding: var(--space-lg);
+}
+.agent-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition);
+}
+.agent-card:hover { border-color: var(--border-mid); }
+.agent-card-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.agent-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.agent-info { flex: 1; }
+.agent-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+.agent-role { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.agent-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  margin-left: auto;
+}
+.agent-status-badge.online { color: var(--accent); }
+.agent-status-badge.alert { color: var(--red); }
+.agent-status-badge.idle { color: var(--text-muted); }
+.agent-stats {
+  display: flex;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.agent-stat { flex: 1; padding: 8px 10px; border-right: 1px solid var(--border-soft); }
+.agent-stat:last-child { border-right: none; }
+.agent-stat-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.agent-stat-value { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.agent-log {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 10px;
+  max-height: 52px;
+  overflow: hidden;
+}
+.agent-log span { color: var(--text-secondary); }
+.agent-actions { display: flex; gap: 6px; padding: 0 16px 14px; }
+.agent-btn {
+  flex: 1;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 500;
+  border: 1px solid var(--border-soft);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  text-align: center;
+}
+.agent-btn:hover { border-color: var(--border-mid); color: var(--text-primary); background: var(--bg-elevated); }
+.agent-btn.primary { background: var(--accent); color: var(--text-inverse); border-color: var(--accent); }
+.agent-btn.primary:hover { background: var(--accent-h); }
+.agent-btn.danger { border-color: rgba(239,68,68,0.3); color: var(--red); }
+
+/* ── AGENT CHAT CONSOLE ── */
+.chat-console {
+  margin: 0 var(--space-lg) var(--space-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.chat-console-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chat-console-title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.chat-console-sub { font-size: 10px; color: var(--text-muted); }
+.agent-selector {
+  display: flex;
+  gap: 5px;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-soft);
+  overflow-x: auto;
+}
+.agent-selector::-webkit-scrollbar { height: 0; }
+.agent-sel-btn {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 500;
+  border: 1px solid var(--border-soft);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+.agent-sel-btn:hover { border-color: var(--border-mid); color: var(--text-primary); }
+.agent-sel-btn.active { font-weight: 600; }
+.chat-messages {
+  height: 280px;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.msg { max-width: 82%; display: flex; flex-direction: column; gap: 3px; }
+.msg.user { align-self: flex-end; align-items: flex-end; }
+.msg.agent-msg { align-self: flex-start; align-items: flex-start; }
+.msg-bubble { padding: 9px 13px; border-radius: 8px; font-size: 12px; line-height: 1.6; }
+.msg.user .msg-bubble { background: var(--accent); color: var(--text-inverse); border-radius: 8px 8px 2px 8px; }
+.msg.agent-msg .msg-bubble { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-soft); border-radius: 8px 8px 8px 2px; }
+.msg-meta { font-size: 9px; color: var(--text-muted); }
+.typing-indicator { display: flex; gap: 3px; align-items: center; padding: 9px 13px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 8px 8px 8px 2px; width: fit-content; }
+.typing-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); animation: typing 0.8s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes typing { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+.chat-input-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-soft);
+  background: var(--bg-elevated);
+}
+.chat-input {
+  flex: 1;
+  background: var(--bg-base);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  transition: var(--transition);
+}
+.chat-input:focus { border-color: var(--accent); }
+.chat-send {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+.chat-send:hover { background: var(--accent-h); }
+
+/* ── API STATUS INDICATOR ── */
+.api-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  margin-left: auto;
+}
+.api-status.connected { background: rgba(0,229,180,0.1); color: var(--accent); border: 1px solid rgba(0,229,180,0.2); }
+.api-status.disconnected { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+/* ═══════════════════════════════════════════════════════════════
+   CYBERSECURITY MODULE
+═══════════════════════════════════════════════════════════════ */
+.threat-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: var(--space-md) var(--space-lg);
+}
+.threat-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+.threat-card.critical { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.04); }
+.threat-card.warning { border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.03); }
+.threat-card.safe { border-color: rgba(0,229,180,0.2); background: rgba(0,229,180,0.03); }
+.threat-card-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+.threat-card.critical .threat-card-label { color: var(--red); }
+.threat-card.warning .threat-card-label { color: var(--amber); }
+.threat-card.safe .threat-card-label { color: var(--accent); }
+.threat-card-value { font-family: var(--font-mono); font-size: 22px; font-weight: 600; color: var(--text-primary); }
+.threat-card-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.firewall-chart { display: grid; grid-template-columns: repeat(24,1fr); gap: 2px; padding: 0 var(--space-lg) var(--space-md); }
+.fw-bar { border-radius: 2px 2px 0 0; }
+.event-stream { max-height: 260px; overflow-y: auto; }
+.event-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px var(--space-lg);
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 11px;
+  transition: var(--transition);
+}
+.event-row:hover { background: var(--bg-surface); }
+.event-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.event-time { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); min-width: 68px; }
+.event-sev { font-size: 9px; padding: 1px 6px; border-radius: 2px; font-weight: 500; white-space: nowrap; }
+.sev-critical { background: rgba(239,68,68,0.15); color: var(--red); }
+.sev-warning { background: rgba(245,158,11,0.12); color: var(--amber); }
+.sev-info { background: rgba(0,153,255,0.1); color: var(--blue); }
+.sev-ok { background: rgba(0,229,180,0.08); color: var(--accent); }
+.event-body { flex: 1; color: var(--text-secondary); }
+.security-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-soft);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPANY PROFILES
+═══════════════════════════════════════════════════════════════ */
+.profile-hero { background: var(--bg-surface); border-bottom: 1px solid var(--border-soft); padding: var(--space-lg) var(--space-xl); }
+.profile-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+.company-avatar {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.profile-meta { flex: 1; }
+.profile-name { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.profile-tags { display: flex; align-items: center; gap: 12px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap; }
+.profile-kpis { display: flex; border: 1px solid var(--border-soft); border-radius: var(--radius-md); overflow: hidden; }
+.profile-kpi { flex: 1; padding: 12px 16px; border-right: 1px solid var(--border-soft); }
+.profile-kpi:last-child { border-right: none; }
+.pkpi-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 3px; font-weight: 600; }
+.pkpi-value { font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.pkpi-delta { font-size: 10px; color: var(--accent); }
+
+/* ── TABS ── */
+.tab-row { display: flex; border-bottom: 1px solid var(--border-soft); background: var(--bg-surface); padding: 0 var(--space-lg); }
+.tab-btn { padding: 10px 14px; font-size: 11px; font-weight: 500; color: var(--text-secondary); border-bottom: 2px solid transparent; cursor: pointer; transition: var(--transition); background: transparent; border-top: none; border-left: none; border-right: none; }
+.tab-btn:hover { color: var(--text-primary); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TRADE LEADS
+═══════════════════════════════════════════════════════════════ */
+.lead-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin: 0 var(--space-lg) 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.lead-card:hover { border-color: var(--border-mid); background: var(--bg-elevated); }
+.lead-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.lead-title { font-size: 12px; font-weight: 600; color: var(--text-primary); flex: 1; padding-right: 12px; }
+.lead-score-wrap { text-align: right; flex-shrink: 0; }
+.lead-score-value { font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--accent); }
+.lead-score-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.lead-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.lead-tag { padding: 2px 6px; border-radius: 2px; font-size: 9px; font-weight: 500; }
+.lead-tag.product { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+.lead-tag.country { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+.lead-tag.hs { background: rgba(0,153,255,0.1); color: var(--blue); border: 1px solid rgba(0,153,255,0.2); }
+.lead-summary { font-size: 11px; color: var(--text-secondary); margin-bottom: 7px; }
+.lead-meta { font-size: 10px; color: var(--text-muted); }
+.lead-actions { display: flex; gap: 6px; margin-top: 10px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPETITOR INTELLIGENCE
+═══════════════════════════════════════════════════════════════ */
+.comp-row { display: flex; align-items: center; gap: 10px; padding: 10px var(--space-lg); border-bottom: 1px solid var(--border-soft); }
+.comp-rank { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); width: 20px; flex-shrink: 0; }
+.comp-info { flex: 1; }
+.comp-name { font-size: 11.5px; font-weight: 500; color: var(--text-primary); cursor: pointer; transition: var(--transition); }
+.comp-name:hover { color: var(--accent); }
+.comp-detail { font-size: 10px; color: var(--text-muted); }
+.comp-bar-wrap { width: 100px; height: 3px; background: var(--bg-overlay); border-radius: 2px; }
+.comp-bar-fill { height: 100%; border-radius: 2px; }
+.comp-share { font-family: var(--font-mono); font-size: 11px; color: var(--text-primary); text-align: right; width: 35px; }
+.comp-value { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); text-align: right; width: 60px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   METRICS DASHBOARD
+═══════════════════════════════════════════════════════════════ */
+.pipeline-item { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border-soft); }
+.pipeline-item:last-child { border-bottom: none; }
+.pipeline-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.pipeline-name { flex: 1; font-size: 11px; color: var(--text-primary); }
+.pipeline-time { font-size: 10px; color: var(--text-muted); }
+.pipeline-status { font-size: 9px; padding: 1px 5px; border-radius: 2px; }
+.geo-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.geo-country { font-size: 11px; color: var(--text-secondary); width: 130px; white-space: nowrap; overflow: hidden; }
+.geo-bar-wrap { flex: 1; height: 3px; background: var(--bg-overlay); border-radius: 2px; }
+.geo-bar-fill { height: 100%; border-radius: 2px; background: var(--blue); }
+.geo-count { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); min-width: 36px; text-align: right; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE COMMAND CENTER
+═══════════════════════════════════════════════════════════════ */
+.mobile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; padding: var(--space-lg); }
+.phone-mockup {
+  background: var(--bg-overlay);
+  border: 2px solid var(--border-mid);
+  border-radius: 32px;
+  overflow: hidden;
+  width: 270px;
+  height: 550px;
+  position: relative;
+}
+.phone-notch { height: 26px; background: var(--bg-overlay); display: flex; align-items: center; justify-content: center; }
+.phone-notch-bar { width: 80px; height: 8px; background: var(--bg-base); border-radius: 4px; }
+.phone-screen { height: calc(100% - 26px); background: var(--bg-base); overflow-y: auto; }
+.phone-header { background: var(--bg-surface); border-bottom: 1px solid var(--border-soft); padding: 9px 12px; display: flex; align-items: center; }
+.phone-logo { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--accent); }
+.phone-body { padding: 9px 11px; }
+.phone-card { background: var(--bg-surface); border: 1px solid var(--border-soft); border-radius: 7px; padding: 10px 11px; margin-bottom: 7px; }
+.phone-card-title { font-size: 10px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+.phone-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.phone-kpi { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 5px; padding: 6px 8px; }
+.phone-kpi-label { font-size: 7px; color: var(--text-muted); text-transform: uppercase; }
+.phone-kpi-value { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.phone-agent-item { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-bottom: 1px solid var(--border-soft); }
+.phone-agent-item:last-child { border-bottom: none; }
+.phone-agent-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.phone-agent-name { font-size: 9px; font-weight: 500; color: var(--text-primary); flex: 1; }
+.phone-agent-status { font-size: 8px; color: var(--text-muted); }
+.phone-alert-item { display: flex; align-items: flex-start; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--border-soft); }
+.phone-alert-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.phone-alert-text { font-size: 8px; color: var(--text-secondary); line-height: 1.5; }
+.phone-quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 6px; }
+.phone-quick-btn { padding: 7px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 4px; font-size: 8px; color: var(--text-secondary); cursor: pointer; text-align: center; transition: var(--transition); }
+.phone-quick-btn:hover { border-color: var(--border-mid); color: var(--text-primary); }
+.phone-main-btn { width: 100%; padding: 7px; background: var(--accent); color: var(--text-inverse); border: none; border-radius: 4px; font-size: 9px; font-weight: 600; cursor: pointer; margin-top: 7px; }
+.setup-guide { flex: 1; }
+.setup-step { display: flex; gap: 14px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border-soft); }
+.setup-step:last-child { border-bottom: none; margin-bottom: 0; }
+.step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--bg-elevated); border: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--accent); flex-shrink: 0; }
+.step-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.step-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
+.step-code { margin-top: 8px; background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 10px 12px; font-family: var(--font-mono); font-size: 10px; color: var(--accent); line-height: 1.7; }
+.step-note { margin-top: 6px; font-size: 10px; color: var(--text-muted); display: flex; gap: 5px; }
+.rec-stack { background: rgba(0,229,180,0.06); border: 1px solid rgba(0,229,180,0.2); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 20px; font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SUBSCRIPTION/PRICING
+═══════════════════════════════════════════════════════════════ */
+.pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: var(--space-md) var(--space-lg); }
+.price-card { background: var(--bg-surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); padding: 20px 16px; position: relative; transition: var(--transition); }
+.price-card:hover { border-color: var(--border-mid); }
+.price-card.featured { border-color: var(--accent); background: linear-gradient(180deg, rgba(0,229,180,0.04) 0%, transparent 100%); }
+.featured-tag { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--text-inverse); font-size: 8px; font-weight: 700; padding: 3px 12px; border-radius: 0 0 5px 5px; letter-spacing: 0.5px; text-transform: uppercase; }
+.price-tier { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+.price-name { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.price-amount { font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: var(--text-primary); margin: 8px 0 2px; }
+.price-amount span { font-size: 12px; font-weight: 400; color: var(--text-muted); }
+.price-desc { font-size: 10px; color: var(--text-muted); margin-bottom: 14px; min-height: 30px; line-height: 1.5; }
+.price-features { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.price-features li { display: flex; align-items: flex-start; gap: 6px; font-size: 10px; color: var(--text-secondary); }
+.price-features li::before { content: '✓'; color: var(--accent); font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+.price-features li.no { color: var(--text-muted); }
+.price-features li.no::before { content: '—'; color: var(--text-muted); }
+.price-cta { width: 100%; padding: 8px; border-radius: var(--radius-sm); font-size: 11px; font-weight: 600; border: 1px solid var(--border-mid); background: transparent; color: var(--text-secondary); transition: var(--transition); }
+.price-cta:hover { color: var(--text-primary); background: var(--bg-overlay); }
+.price-cta.featured { background: var(--accent); color: var(--text-inverse); border-color: var(--accent); }
+.price-cta.featured:hover { background: var(--accent-h); }
+.billing-toggle { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 0 0; font-size: 12px; color: var(--text-secondary); }
+.toggle-track { width: 36px; height: 20px; background: var(--accent); border-radius: 10px; cursor: pointer; position: relative; }
+.toggle-thumb { width: 14px; height: 14px; background: var(--text-inverse); border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: transform 0.2s; }
+.toggle-thumb.on { transform: translateX(16px); }
+.agent-features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 var(--space-lg) var(--space-md); }
+.agent-feat-item { background: var(--bg-surface); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+.agent-feat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.agent-feat-name { font-size: 11px; font-weight: 500; color: var(--text-primary); }
+.agent-feat-desc { font-size: 9px; color: var(--text-muted); }
+.plan-matrix-wrap { overflow-x: auto; padding: 0 var(--space-lg) var(--space-md); }
+.plan-matrix { width: 100%; border-collapse: collapse; }
+.plan-matrix th { background: var(--bg-elevated); color: var(--text-muted); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; padding: 10px 14px; text-align: center; border: 1px solid var(--border-soft); }
+.plan-matrix th:first-child { text-align: left; }
+.plan-matrix td { padding: 8px 14px; border: 1px solid var(--border-soft); font-size: 10px; color: var(--text-secondary); text-align: center; vertical-align: middle; }
+.plan-matrix td:first-child { text-align: left; color: var(--text-primary); font-weight: 500; }
+.plan-matrix tr:hover td { background: rgba(255,255,255,0.015); }
+.plan-matrix .chk { color: var(--accent); font-weight: 700; }
+.plan-matrix .no { color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ALERTS
+═══════════════════════════════════════════════════════════════ */
+.alert-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px var(--space-lg); border-bottom: 1px solid var(--border-soft); transition: var(--transition); }
+.alert-item:hover { background: var(--bg-surface); }
+.alert-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.alert-body { flex: 1; }
+.alert-title { font-size: 11.5px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+.alert-time { font-size: 10px; color: var(--text-muted); }
+.alert-tag { font-size: 9px; padding: 2px 6px; border-radius: 2px; font-weight: 500; }
+.alert-tag.new { background: rgba(0,229,180,0.1); color: var(--accent); border: 1px solid rgba(0,229,180,0.2); }
+.alert-tag.update { background: rgba(0,153,255,0.08); color: var(--blue); border: 1px solid rgba(0,153,255,0.2); }
+.alert-tag.critical { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+/* ═══════════════════════════════════════════════════════════════
+   SEARCH PAGE HERO
+═══════════════════════════════════════════════════════════════ */
+.search-bar-wrap {
+  display: flex;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-width: 680px;
+  margin-top: 14px;
+}
+.search-type-select {
+  background: var(--bg-overlay);
+  border-right: 1px solid var(--border-soft);
+  padding: 0 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  border-top: none;
+  border-bottom: none;
+  border-left: none;
+  outline: none;
+  cursor: pointer;
+}
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 11px 14px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+.search-input::placeholder { color: var(--text-muted); }
+.search-btn { background: var(--accent); color: var(--text-inverse); border: none; padding: 0 20px; font-size: 12px; font-weight: 600; transition: var(--transition); }
+.search-btn:hover { background: var(--accent-h); }
+.hero-stats { display: flex; gap: 28px; margin-top: 16px; }
+.hero-stat-value { font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.hero-stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   DETAIL DRAWER
+═══════════════════════════════════════════════════════════════ */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; }
+.overlay.open { display: flex; align-items: stretch; justify-content: flex-end; }
+.drawer { width: 560px; background: var(--bg-surface); border-left: 1px solid var(--border-mid); display: flex; flex-direction: column; overflow-y: auto; }
+.drawer-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-soft); }
+.drawer-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.drawer-close { cursor: pointer; color: var(--text-muted); font-size: 20px; line-height: 1; transition: var(--transition); background: none; border: none; }
+.drawer-close:hover { color: var(--text-primary); }
+.drawer-body { padding: 18px; flex: 1; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.detail-card { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 12px; }
+.detail-card-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 4px; font-weight: 600; }
+.detail-card-value { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.detail-card-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   INFO CARDS GRID
+═══════════════════════════════════════════════════════════════ */
+.info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: var(--space-md) var(--space-lg); }
+.info-card { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 12px 14px; }
+.info-card-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 4px; font-weight: 600; }
+.info-card-value { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════════ */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-soft); }
+.divider { height: 1px; background: var(--border-soft); }
+.spacer { height: var(--space-md); }
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.text-mono { font-family: var(--font-mono); }
+.text-accent { color: var(--accent); }
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+.fw-6 { font-weight: 600; }
+.fs-10 { font-size: 10px; }
+.fs-11 { font-size: 11px; }
+.fs-12 { font-size: 12px; }
+
+/* ── LOADING STATE ── */
+.loader { display: flex; justify-content: center; align-items: center; height: 80px; gap: 4px; }
+.loader-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: loader-bounce 0.8s infinite; }
+.loader-dot:nth-child(2) { animation-delay: 0.15s; }
+.loader-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes loader-bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-7px); } }
+
+/* ── SPARKLINES ── */
+.sparkline { display: flex; align-items: flex-end; gap: 2px; height: 18px; }
+.spark-bar { width: 4px; border-radius: 1px 1px 0 0; }
+
+/* ── SHARE BARS ── */
+.share-bar-wrap { display: flex; align-items: center; gap: 7px; }
+.share-bar { height: 3px; background: var(--bg-overlay); border-radius: 2px; }
+.share-bar-fill { height: 100%; border-radius: 2px; }
+.share-pct { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); min-width: 28px; }
+
+/* ── CONNECTION STATUS BANNER ── */
+.connection-banner {
+  display: none;
+  background: rgba(245,158,11,0.1);
+  border-bottom: 1px solid rgba(245,158,11,0.25);
+  padding: 6px var(--space-lg);
+  font-size: 11px;
+  color: var(--amber);
+  align-items: center;
+  gap: 8px;
+}
+.connection-banner.show { display: flex; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══ CONNECTION STATUS BANNER ═══ -->
+  <div class="connection-banner" id="connectionBanner">
+    ⚠ Backend connection unavailable — running in demo mode. Configure BACKEND_URL to connect to your live server.
+  </div>
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-mark">◈</div>
+      TradeIntel OS
+    </div>
+    <nav class="topbar-nav">
+      <button class="tnav-item active" onclick="showPage('search')">Shipments</button>
+      <button class="tnav-item" onclick="showPage('analytics')">Analytics</button>
+      <button class="tnav-item" onclick="showPage('companies')">Companies</button>
+      <button class="tnav-item" onclick="showPage('leads')">Trade Leads</button>
+      <button class="tnav-item" onclick="showPage('competitor')">Intel</button>
+      <button class="tnav-item" onclick="showPage('agents')">AI Agents</button>
+      <button class="tnav-item" onclick="showPage('security')">Security</button>
+      <button class="tnav-item" onclick="showPage('metrics')">Metrics</button>
+      <button class="tnav-item" onclick="showPage('mobile')">Mobile</button>
+      <button class="tnav-item" onclick="showPage('alerts')">Alerts</button>
+      <button class="tnav-item" onclick="showPage('pricing')">Pricing</button>
+    </nav>
+    <div class="topbar-actions">
+      <div class="status-indicator"><div class="pulse green"></div><span>5 agents live</span></div>
+      <span class="plan-badge">ENTERPRISE</span>
+      <button class="btn" onclick="showPage('pricing')">Upgrade</button>
+      <button class="btn btn-primary">+ Save Search</button>
+    </div>
+  </header>
+
+  <!-- ═══ TICKER ═══ -->
+  <div class="ticker-strip">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- ═══ BODY ═══ -->
+  <div class="app-body">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+      <div class="sb-section">
+        <div class="sb-label">Trade Intelligence</div>
+        <button class="sb-item active" onclick="showPage('search')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Shipment Search
+        </button>
+        <button class="sb-item" onclick="showPage('analytics')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Analytics
+        </button>
+        <button class="sb-item" onclick="showPage('companies')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Companies
+        </button>
+        <button class="sb-item" onclick="showPage('leads')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Trade Leads
+          <span class="sb-count green">247</span>
+        </button>
+        <button class="sb-item" onclick="showPage('competitor')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Competitor Intel
+        </button>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">AI Agents</div>
+        <button class="sb-item" onclick="showPage('agents')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Agent Console
+          <span class="sb-count green">5</span>
+        </button>
+        <button class="sb-item" onclick="showPage('security')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          CyberGuard
+          <span class="sb-count red">2</span>
+        </button>
+        <button class="sb-item" onclick="showPage('metrics')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          DataPulse
+        </button>
+        <button class="sb-item" onclick="showPage('mobile')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Mobile Command
+        </button>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">Platform</div>
+        <button class="sb-item" onclick="showPage('alerts')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Alerts
+          <span class="sb-count amber">12</span>
+        </button>
+        <button class="sb-item" onclick="showPage('pricing')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Subscriptions
+        </button>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="sb-filter">
+        <div class="filter-label">Date Range</div>
+        <div style="display:flex;gap:4px;">
+          <input type="date" class="filter-input" value="2024-01-01" style="flex:1;">
+          <input type="date" class="filter-input" value="2024-12-31" style="flex:1;">
+        </div>
+        <div class="chip-group">
+          <span class="chip active">30D</span>
+          <span class="chip">90D</span>
+          <span class="chip">1Y</span>
+          <span class="chip">3Y</span>
+          <span class="chip">5Y</span>
+        </div>
+      </div>
+      <div class="sb-filter">
+        <div class="filter-label">Direction</div>
+        <div class="chip-group">
+          <span class="chip active">All</span>
+          <span class="chip">Imports</span>
+          <span class="chip">Exports</span>
+        </div>
+      </div>
+      <div class="sb-filter">
+        <div class="filter-label">Country</div>
+        <select class="filter-select">
+          <option>All Countries</option>
+          <option>China 🇨🇳</option>
+          <option>Vietnam 🇻🇳</option>
+          <option>India 🇮🇳</option>
+          <option>Germany 🇩🇪</option>
+          <option>Mexico 🇲🇽</option>
+          <option>Taiwan 🇹🇼</option>
+          <option>South Korea 🇰🇷</option>
+          <option>Japan 🇯🇵</option>
+          <option>Bangladesh 🇧🇩</option>
+        </select>
+      </div>
+      <div class="sb-filter">
+        <div class="filter-label">HS Code / Product</div>
+        <input type="text" class="filter-input" placeholder="e.g. 8471, 6110..." id="hsFilter">
+        <div class="chip-group">
+          <span class="chip">Electronics</span>
+          <span class="chip">Apparel</span>
+          <span class="chip">Vehicles</span>
+          <span class="chip">Pharma</span>
+        </div>
+      </div>
+      <div class="sb-filter">
+        <div class="filter-label">Port</div>
+        <select class="filter-select">
+          <option>All Ports</option>
+          <option>Los Angeles / Long Beach</option>
+          <option>New York / Newark</option>
+          <option>Houston</option>
+          <option>Seattle / Tacoma</option>
+          <option>Savannah</option>
+          <option>Chicago</option>
+        </select>
+      </div>
+      <div style="padding:8px 12px 12px;">
+        <button class="apply-btn">Apply Filters</button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main-content">
+
+      <!-- ═══════════════ SEARCH PAGE ═══════════════ -->
+      <div class="page active" id="page-search">
+        <div class="page-hero">
+          <div class="hero-eyebrow">Global Trade Intelligence Platform</div>
+          <div class="hero-title">Search 800M+ Shipment Records</div>
+          <div class="hero-subtitle">Bill of lading · Customs manifests · 190+ countries · Real-time data</div>
+          <div class="search-bar-wrap">
+            <select class="search-type-select">
+              <option>Company</option>
+              <option>HS Code</option>
+              <option>Product</option>
+              <option>Vessel</option>
+              <option>Bill of Lading</option>
+            </select>
+            <input type="text" class="search-input" value="Apple Inc" placeholder="Search companies, HS codes, products, vessels...">
+            <button class="search-btn" onclick="runSearch()">Search →</button>
+          </div>
+          <div class="hero-stats">
+            <div><div class="hero-stat-value">847M+</div><div class="hero-stat-label">Shipments</div></div>
+            <div><div class="hero-stat-value">190+</div><div class="hero-stat-label">Countries</div></div>
+            <div><div class="hero-stat-value">2.1M+</div><div class="hero-stat-label">Companies</div></div>
+            <div><div class="hero-stat-value">5,200+</div><div class="hero-stat-label">Ports</div></div>
+            <div><div class="hero-stat-value">Daily</div><div class="hero-stat-label">Updates</div></div>
+          </div>
+        </div>
+        <div class="kpi-strip" style="grid-template-columns:repeat(5,1fr);">
+          <div class="kpi-card"><div class="kpi-label">Total Shipments</div><div class="kpi-value">14,832</div><div class="kpi-delta up">↑ 12.4% vs prior</div></div>
+          <div class="kpi-card"><div class="kpi-label">Total Value</div><div class="kpi-value">$2.84B</div><div class="kpi-delta up">↑ 8.7%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Avg Shipment</div><div class="kpi-value">$191K</div><div class="kpi-delta dn">↓ 3.2%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Suppliers</div><div class="kpi-value">342</div><div class="kpi-delta up">↑ 5.1%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Trade Lanes</div><div class="kpi-value">89</div><div class="kpi-delta dn">↓ 2.1%</div></div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">Shipment Records <span class="section-badge">14,832 results</span></div>
+          <div class="section-actions">
+            <button class="icon-btn">⬇ CSV</button>
+            <button class="icon-btn">⬇ Excel</button>
+            <button class="icon-btn">⊞ View</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Shipper</th><th>Consignee</th><th>HS Code</th>
+                <th>Product</th><th>Origin</th><th>Dest</th>
+                <th style="text-align:right">Weight KG</th>
+                <th style="text-align:right">Value USD</th>
+                <th style="text-align:right">TEU</th>
+                <th>Type</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="shipmentTableBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <div>Showing <strong>1–25</strong> of <strong>14,832</strong></div>
+          <div class="pag-btns">
+            <button class="pag-btn">‹</button>
+            <button class="pag-btn active">1</button>
+            <button class="pag-btn">2</button>
+            <button class="pag-btn">3</button>
+            <span style="padding:4px 6px;font-size:10px;color:var(--text-muted)">...</span>
+            <button class="pag-btn">594</button>
+            <button class="pag-btn">›</button>
+          </div>
+          <select style="background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:3px;color:var(--text-secondary);padding:3px 7px;font-size:10px;outline:none;">
+            <option>25/page</option><option>50/page</option><option>100/page</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ═══════════════ ANALYTICS PAGE ═══════════════ -->
+      <div class="page" id="page-analytics">
+        <div class="page-hero">
+          <div class="hero-eyebrow">Analytics Engine</div>
+          <div class="hero-title">Trade Trends & Seasonality</div>
+          <div class="hero-subtitle">Identify patterns, seasonal peaks, and logistical shifts across products and trade lanes</div>
+        </div>
+        <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr);">
+          <div class="kpi-card"><div class="kpi-label">YTD Import Volume</div><div class="kpi-value">$3.14T</div><div class="kpi-delta up">↑ 8.2%</div></div>
+          <div class="kpi-card"><div class="kpi-label">YTD Export Volume</div><div class="kpi-value">$2.89T</div><div class="kpi-delta up">↑ 6.4%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Container Rate FBX</div><div class="kpi-value">$2,840</div><div class="kpi-delta dn">↓ 4.2%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Active Vessels</div><div class="kpi-value">5,842</div><div class="kpi-delta up">↑ 1.2%</div></div>
+        </div>
+        <div class="charts-grid" style="grid-template-columns:1fr;">
+          <div class="chart-panel">
+            <div class="chart-title">Shipment Volume — 2024 vs 2023</div>
+            <div class="chart-subtitle">Monthly comparison, all product categories</div>
+            <div class="chart-canvas-wrap" style="height:180px;"><canvas id="timelineChart"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="chart-panel">
+            <div class="chart-title">Top Origin Countries</div>
+            <div class="chart-subtitle">By shipment value, current period</div>
+            <div class="chart-canvas-wrap" style="height:170px;"><canvas id="countryChart"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title">HS Code Distribution</div>
+            <div class="chart-subtitle">Top product categories by value</div>
+            <div class="chart-canvas-wrap" style="height:170px;"><canvas id="hsChart"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title">Seasonality Heatmap — Apparel HS 6110</div>
+            <div class="chart-subtitle">52-week shipment intensity · 2024</div>
+            <div class="heatmap-row" id="heatmapGrid"></div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:9px;color:var(--text-muted);">
+              <span>Low</span>
+              <div style="display:flex;gap:2px;">
+                <div style="width:9px;height:9px;background:rgba(0,229,180,.1);border-radius:1px;"></div>
+                <div style="width:9px;height:9px;background:rgba(0,229,180,.3);border-radius:1px;"></div>
+                <div style="width:9px;height:9px;background:rgba(0,229,180,.55);border-radius:1px;"></div>
+                <div style="width:9px;height:9px;background:var(--accent);border-radius:1px;"></div>
+              </div>
+              <span>High</span>
+            </div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title">Monthly Seasonality Average</div>
+            <div class="chart-subtitle">3-year average volume by month</div>
+            <div class="seasonality-bars" id="seasonalityBars"></div>
+          </div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">Trade Lane Analysis</div>
+        </div>
+        <div style="padding:0 var(--space-lg) var(--space-md);">
+          <table>
+            <thead>
+              <tr>
+                <th>Trade Lane</th>
+                <th style="text-align:right">Shipments</th>
+                <th style="text-align:right">Value USD</th>
+                <th style="text-align:right">YoY Change</th>
+                <th>Trend</th>
+              </tr>
+            </thead>
+            <tbody id="tradeLaneBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════ COMPANIES PAGE ═══════════════ -->
+      <div class="page" id="page-companies">
+        <div class="profile-hero">
+          <div class="profile-header">
+            <div class="company-avatar">AP</div>
+            <div class="profile-meta">
+              <div class="profile-name">Apple Inc. <span style="font-size:13px;color:var(--text-muted);font-weight:400;">— US Importer</span></div>
+              <div class="profile-tags">
+                <span>🇺🇸 United States</span>
+                <span>📦 Electronics & Tech</span>
+                <span style="font-family:var(--font-mono);font-size:10px;color:var(--accent);">DUNS: 00-187-3401</span>
+                <span style="font-size:9px;padding:2px 6px;background:rgba(0,229,180,.1);color:var(--accent);border:1px solid rgba(0,229,180,.2);border-radius:2px;">Active Importer</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-left:auto;">
+              <button class="icon-btn">+ Track</button>
+              <button class="icon-btn">⬇ Export</button>
+              <button class="icon-btn">≡ Compare</button>
+            </div>
+          </div>
+          <div class="profile-kpis">
+            <div class="profile-kpi"><div class="pkpi-label">Shipments</div><div class="pkpi-value">14,832</div><div class="pkpi-delta">↑ 12% YoY</div></div>
+            <div class="profile-kpi"><div class="pkpi-label">Total Value</div><div class="pkpi-value">$284B</div><div class="pkpi-delta">↑ 8.7% YoY</div></div>
+            <div class="profile-kpi"><div class="pkpi-label">Suppliers</div><div class="pkpi-value">342</div><div class="pkpi-delta">+18 new</div></div>
+            <div class="profile-kpi"><div class="pkpi-label">Top Origin</div><div class="pkpi-value">🇨🇳 China</div><div class="pkpi-delta" style="color:var(--text-muted);">62% of imports</div></div>
+            <div class="profile-kpi"><div class="pkpi-label">Top HS</div><div class="pkpi-value">8471.30</div><div class="pkpi-delta" style="color:var(--text-muted);">Laptops</div></div>
+            <div class="profile-kpi"><div class="pkpi-label">Avg Lead Time</div><div class="pkpi-value">18.4d</div><div class="pkpi-delta" style="color:var(--text-muted);">Ocean freight</div></div>
+          </div>
+        </div>
+        <div class="tab-row">
+          <button class="tab-btn active" onclick="showTab(this,'tc-shipments')">Shipments</button>
+          <button class="tab-btn" onclick="showTab(this,'tc-suppliers')">Suppliers</button>
+          <button class="tab-btn" onclick="showTab(this,'tc-products')">Products</button>
+          <button class="tab-btn" onclick="showTab(this,'tc-network')">Trade Network</button>
+        </div>
+        <div class="tab-content active" id="tc-shipments">
+          <div class="info-grid">
+            <div class="info-card"><div class="info-card-label">Most Active Port</div><div class="info-card-value">Los Angeles, CA</div></div>
+            <div class="info-card"><div class="info-card-label">Avg Shipment Size</div><div class="info-card-value">4.2 TEU</div></div>
+            <div class="info-card"><div class="info-card-label">Peak Month</div><div class="info-card-value">September</div></div>
+          </div>
+          <div class="table-wrap" style="padding:0 var(--space-lg) var(--space-md);">
+            <table><thead><tr><th>Date</th><th>Shipper</th><th>HS Code</th><th>Product</th><th>Origin</th><th style="text-align:right">Value</th><th style="text-align:right">Weight</th><th>Port</th></tr></thead><tbody id="coShipBody"></tbody></table>
+          </div>
+        </div>
+        <div class="tab-content" id="tc-suppliers">
+          <div id="supplierTableWrap" style="padding:0 0 var(--space-md);"></div>
+        </div>
+        <div class="tab-content" id="tc-products">
+          <div style="padding:var(--space-md) var(--space-lg);">
+            <div class="chart-canvas-wrap" style="height:200px;"><canvas id="productChart"></canvas></div>
+          </div>
+        </div>
+        <div class="tab-content" id="tc-network">
+          <div style="padding:var(--space-md) var(--space-lg);">
+            <div style="background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:var(--radius-md);height:200px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text-muted);font-size:12px;margin-bottom:16px;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>Trade Network Map — 89 active trade lanes</span>
+              <span style="font-size:10px;">Connect MarineTraffic API for live vessel tracking</span>
+            </div>
+            <div id="tradeRoutesWrap"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ LEADS PAGE ═══════════════ -->
+      <div class="page" id="page-leads">
+        <div class="page-hero">
+          <div class="hero-eyebrow">AI-Powered Opportunity Detection</div>
+          <div class="hero-title">Trade Leads & Market Opportunities</div>
+          <div class="hero-subtitle">Algorithmically scored leads based on shipment patterns, market gaps, and seasonal signals</div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">Active Leads <span class="section-badge">247 opportunities</span></div>
+          <div class="section-actions">
+            <button class="icon-btn accent">Score ↓</button>
+            <button class="icon-btn">Product ▾</button>
+            <button class="icon-btn">Country ▾</button>
+          </div>
+        </div>
+        <div id="leadsContainer" style="padding-bottom:var(--space-md);"></div>
+      </div>
+
+      <!-- ═══════════════ COMPETITOR PAGE ═══════════════ -->
+      <div class="page" id="page-competitor">
+        <div class="page-hero">
+          <div class="hero-eyebrow">Competitive Intelligence</div>
+          <div class="hero-title">Market Share & Supplier Networks</div>
+          <div class="hero-subtitle">Identify competitor supply chains, shared suppliers, and market position shifts over time</div>
+        </div>
+        <div class="two-col">
+          <div style="background:var(--bg-surface);padding:var(--space-lg);">
+            <div class="chart-title">Market Share — Electronics HS 8471</div>
+            <div class="chart-subtitle">US Market 2024 vs 2023</div>
+            <div class="chart-canvas-wrap" style="height:200px;"><canvas id="mktShareChart"></canvas></div>
+          </div>
+          <div style="background:var(--bg-surface);padding:var(--space-lg);">
+            <div class="chart-title">Supply Chain Diversification</div>
+            <div class="chart-subtitle">Index vs top competitors</div>
+            <div class="chart-canvas-wrap" style="height:200px;"><canvas id="divChart"></canvas></div>
+          </div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">Competitor Rankings <span class="section-badge">By Import Value</span></div>
+          <div class="section-actions">
+            <button class="icon-btn">+ Add Competitor</button>
+            <button class="icon-btn">⬇ Export</button>
+          </div>
+        </div>
+        <div id="competitorList"></div>
+      </div>
+
+      <!-- ═══════════════ AI AGENTS PAGE ═══════════════ -->
+      <div class="page" id="page-agents">
+        <div class="page-hero" style="background:linear-gradient(135deg,var(--bg-surface) 0%,rgba(0,229,180,0.03) 100%);">
+          <div class="hero-eyebrow">TradeIntel AI Agent Suite</div>
+          <div class="hero-title">5 Specialized AI Agents — Live</div>
+          <div class="hero-subtitle">Purpose-built agents powered by Claude · Mixed Sonnet 4.6 / Opus 4.6 model strategy · Monitor, respond, analyze, and defend</div>
+        </div>
+        <div class="kpi-strip" style="grid-template-columns:repeat(5,1fr);">
+          <div class="kpi-card" style="border-left:2px solid var(--agent-cyber);"><div class="kpi-label" style="color:var(--agent-cyber);">CyberGuard</div><div class="kpi-value">98.7%</div><div class="kpi-delta up">Threat block rate</div></div>
+          <div class="kpi-card" style="border-left:2px solid var(--agent-cx);"><div class="kpi-label" style="color:var(--agent-cx);">CustomerAI</div><div class="kpi-value">1,284</div><div class="kpi-delta up">Resolved today</div></div>
+          <div class="kpi-card" style="border-left:2px solid var(--agent-data);"><div class="kpi-label" style="color:var(--agent-data);">DataPulse</div><div class="kpi-value">847</div><div class="kpi-delta up">Reports generated</div></div>
+          <div class="kpi-card" style="border-left:2px solid var(--agent-site);"><div class="kpi-label" style="color:var(--agent-site);">SiteKeeper</div><div class="kpi-value">99.94%</div><div class="kpi-delta up">Uptime maintained</div></div>
+          <div class="kpi-card" style="border-left:2px solid var(--agent-trade);"><div class="kpi-label" style="color:var(--agent-trade);">TradeScout</div><div class="kpi-value">247</div><div class="kpi-delta up">Leads identified</div></div>
+        </div>
+        <div class="agents-grid" id="agentCardsContainer"></div>
+
+        <!-- AGENT CHAT CONSOLE -->
+        <div class="chat-console">
+          <div class="chat-console-header">
+            <div class="pulse green"></div>
+            <div>
+              <div class="chat-console-title">Agent Command Console</div>
+              <div class="chat-console-sub">Chat directly with any agent · Powered by Claude AI</div>
+            </div>
+            <div class="api-status" id="apiStatus">
+              <div class="pulse green"></div>
+              Connecting...
+            </div>
+            <button class="icon-btn" onclick="clearChat()" style="margin-left:8px;">Clear</button>
+          </div>
+          <div class="agent-selector" id="agentSelector"></div>
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask the selected agent anything..." onkeydown="if(event.key==='Enter')sendMessage()">
+            <button class="chat-send" onclick="sendMessage()">Send →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ SECURITY PAGE ═══════════════ -->
+      <div class="page" id="page-security">
+        <div class="page-hero" style="background:linear-gradient(135deg,var(--bg-surface) 0%,rgba(239,68,68,0.04) 100%);">
+          <div class="hero-eyebrow" style="color:var(--red);">CyberGuard AI Agent — Active</div>
+          <div class="hero-title">Cybersecurity Command Center</div>
+          <div class="hero-subtitle">Real-time threat monitoring · Intrusion detection · Automated defense · Powered by Claude AI</div>
+        </div>
+        <div class="kpi-strip" style="grid-template-columns:repeat(6,1fr);">
+          <div class="kpi-card" style="border-top:2px solid var(--red);"><div class="kpi-label" style="color:var(--red);">Active Threats</div><div class="kpi-value" style="color:var(--red);">2</div><div class="kpi-delta dn">⚠ Investigating</div></div>
+          <div class="kpi-card"><div class="kpi-label">Blocked Today</div><div class="kpi-value">4,821</div><div class="kpi-delta up">↑ 3.2%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Request Rate</div><div class="kpi-value">2,847/s</div><div class="kpi-delta up">Normal</div></div>
+          <div class="kpi-card"><div class="kpi-label">Failed Logins</div><div class="kpi-value">187</div><div class="kpi-delta dn">↑ 22% flagged</div></div>
+          <div class="kpi-card"><div class="kpi-label">SSL Grade</div><div class="kpi-value" style="color:var(--accent);">A+</div><div class="kpi-delta up">All certs valid</div></div>
+          <div class="kpi-card"><div class="kpi-label">Uptime</div><div class="kpi-value">99.94%</div><div class="kpi-delta up">30-day avg</div></div>
+        </div>
+        <div style="padding:var(--space-md) var(--space-lg) var(--space-sm);">
+          <div style="font-size:11px;font-weight:600;color:var(--text-primary);margin-bottom:10px;">Live Firewall Activity — Last 24 Hours</div>
+          <div class="firewall-chart" id="firewallChart"></div>
+        </div>
+        <div class="threat-overview">
+          <div class="threat-card critical"><div class="threat-card-label">Brute Force Attempts</div><div class="threat-card-value">187</div><div class="threat-card-sub">IP: 103.21.244.x — Auto-blocked</div></div>
+          <div class="threat-card warning"><div class="threat-card-label">Suspicious Crawlers</div><div class="threat-card-value">42</div><div class="threat-card-sub">Rate-limiting applied</div></div>
+          <div class="threat-card safe"><div class="threat-card-label">DDoS Mitigation</div><div class="threat-card-value">Active</div><div class="threat-card-sub">Cloudflare layer: OK</div></div>
+          <div class="threat-card warning"><div class="threat-card-label">SQL Injection Attempts</div><div class="threat-card-value">14</div><div class="threat-card-sub">WAF rules triggered</div></div>
+          <div class="threat-card safe"><div class="threat-card-label">Data Encryption</div><div class="threat-card-value">AES-256</div><div class="threat-card-sub">All endpoints TLS 1.3</div></div>
+          <div class="threat-card critical"><div class="threat-card-label">Geo-blocked Regions</div><div class="threat-card-value">12</div><div class="threat-card-sub">High-risk IPs blocked</div></div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">Live Security Event Stream <span class="section-badge" style="color:var(--red);border-color:rgba(239,68,68,.2);">Real-time</span></div>
+          <div class="section-actions">
+            <button class="icon-btn">⬇ Export Log</button>
+            <button class="icon-btn accent" onclick="askAgent('cyberguard','Give me a full security status report')">Ask CyberGuard</button>
+          </div>
+        </div>
+        <div class="event-stream" id="eventStream"></div>
+        <div class="security-actions">
+          <div style="font-size:11px;font-weight:600;color:var(--text-primary);width:100%;margin-bottom:6px;">🛡 CyberGuard Quick Actions</div>
+          <button class="icon-btn btn-danger" onclick="askAgent('cyberguard','Block IP range 103.21.244.x immediately and report')">⛔ Block Threat IP</button>
+          <button class="icon-btn" onclick="askAgent('cyberguard','Run a full security audit and list all vulnerabilities')">🔍 Security Audit</button>
+          <button class="icon-btn" onclick="askAgent('cyberguard','Analyze the 187 failed login attempts and recommend countermeasures')">🔐 Analyze Logins</button>
+          <button class="icon-btn" onclick="askAgent('cyberguard','Check SSL certificates and security headers status')">📜 SSL Check</button>
+          <button class="icon-btn" onclick="askAgent('cyberguard','Generate a comprehensive incident report for the past 24 hours')">📋 Incident Report</button>
+          <button class="icon-btn" onclick="askAgent('cyberguard','Scan for malware and suspicious code injections')">🦠 Malware Scan</button>
+        </div>
+      </div>
+
+      <!-- ═══════════════ METRICS PAGE ═══════════════ -->
+      <div class="page" id="page-metrics">
+        <div class="page-hero">
+          <div class="hero-eyebrow">DataPulse AI Agent — Active</div>
+          <div class="hero-title">Platform Metrics & Performance</div>
+          <div class="hero-subtitle">Real-time platform analytics, user behavior, revenue tracking, and data pipeline health</div>
+        </div>
+        <div class="kpi-strip" style="grid-template-columns:repeat(6,1fr);">
+          <div class="kpi-card"><div class="kpi-label">Active Users</div><div class="kpi-value">12,847</div><div class="kpi-delta up">↑ 18.4%</div></div>
+          <div class="kpi-card"><div class="kpi-label">MRR</div><div class="kpi-value">$284K</div><div class="kpi-delta up">↑ 12.1%</div></div>
+          <div class="kpi-card"><div class="kpi-label">API Calls Today</div><div class="kpi-value">4.2M</div><div class="kpi-delta up">↑ 6.7%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Avg Response</div><div class="kpi-value">142ms</div><div class="kpi-delta up">↓ 8ms</div></div>
+          <div class="kpi-card"><div class="kpi-label">Data Freshness</div><div class="kpi-value">2.4h</div><div class="kpi-delta up">On schedule</div></div>
+          <div class="kpi-card"><div class="kpi-label">Support Tickets</div><div class="kpi-value">34</div><div class="kpi-delta dn">↑ 8%</div></div>
+        </div>
+        <div class="charts-grid" style="grid-template-columns:1fr;">
+          <div class="chart-panel">
+            <div class="chart-title">Revenue & Subscriptions — 12 Month Rolling</div>
+            <div class="chart-subtitle">MRR by subscription tier</div>
+            <div class="chart-canvas-wrap" style="height:180px;"><canvas id="revenueChart"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="chart-panel">
+            <div class="chart-title">Users by Plan</div>
+            <div class="chart-subtitle">Active subscribers</div>
+            <div class="chart-canvas-wrap" style="height:160px;"><canvas id="planChart"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title">API Performance P95</div>
+            <div class="chart-subtitle">Response time last 24h</div>
+            <div class="chart-canvas-wrap" style="height:160px;"><canvas id="perfChart"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-title">Data Pipeline Health</div>
+            <div class="chart-subtitle">Ingest job status</div>
+            <div id="pipelineList" style="margin-top:10px;"></div>
+          </div>
+        </div>
+        <div class="charts-grid" style="grid-template-columns:1fr;">
+          <div class="chart-panel">
+            <div class="chart-title">Geographic User Distribution</div>
+            <div class="chart-subtitle">Active sessions by country</div>
+            <div id="geoList" style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ MOBILE COMMAND PAGE ═══════════════ -->
+      <div class="page" id="page-mobile">
+        <div class="page-hero">
+          <div class="hero-eyebrow">Remote Management</div>
+          <div class="hero-title">Mobile Command Center</div>
+          <div class="hero-subtitle">Manage all AI agents, monitor security, and control your platform from anywhere</div>
+        </div>
+        <div class="mobile-layout">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><div class="pulse green"></div>Live Preview — Mobile App</div>
+            <div class="phone-mockup">
+              <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+              <div class="phone-screen">
+                <div class="phone-header">
+                  <div class="phone-logo">◈ TradeIntel</div>
+                  <div style="margin-left:auto;display:flex;gap:4px;align-items:center;"><div class="pulse green" style="width:5px;height:5px;"></div><span style="font-size:8px;color:var(--text-muted);">LIVE</span></div>
+                </div>
+                <div class="phone-body">
+                  <div class="phone-card">
+                    <div class="phone-card-title">Platform Overview</div>
+                    <div class="phone-kpi-grid">
+                      <div class="phone-kpi"><div class="phone-kpi-label">Users</div><div class="phone-kpi-value">12.8K</div></div>
+                      <div class="phone-kpi"><div class="phone-kpi-label">MRR</div><div class="phone-kpi-value">$284K</div></div>
+                      <div class="phone-kpi"><div class="phone-kpi-label">Uptime</div><div class="phone-kpi-value">99.94%</div></div>
+                      <div class="phone-kpi"><div class="phone-kpi-label" style="color:var(--red);">Threats</div><div class="phone-kpi-value" style="color:var(--red);">2</div></div>
+                    </div>
+                  </div>
+                  <div class="phone-card">
+                    <div class="phone-card-title">AI Agents</div>
+                    <div class="phone-agent-item"><div class="phone-agent-dot" style="background:var(--red);box-shadow:0 0 4px var(--red);"></div><div class="phone-agent-name">🛡 CyberGuard</div><div class="phone-agent-status">2 threats active</div></div>
+                    <div class="phone-agent-item"><div class="phone-agent-dot" style="background:var(--accent);box-shadow:0 0 4px var(--accent);"></div><div class="phone-agent-name">💬 CustomerAI</div><div class="phone-agent-status">3 active chats</div></div>
+                    <div class="phone-agent-item"><div class="phone-agent-dot" style="background:var(--accent);box-shadow:0 0 4px var(--accent);"></div><div class="phone-agent-name">📊 DataPulse</div><div class="phone-agent-status">Running report</div></div>
+                    <div class="phone-agent-item"><div class="phone-agent-dot" style="background:var(--accent);box-shadow:0 0 4px var(--accent);"></div><div class="phone-agent-name">⚙ SiteKeeper</div><div class="phone-agent-status">All systems OK</div></div>
+                    <div class="phone-agent-item"><div class="phone-agent-dot" style="background:var(--amber);box-shadow:0 0 4px var(--amber);"></div><div class="phone-agent-name">🔍 TradeScout</div><div class="phone-agent-status">Scanning leads</div></div>
+                  </div>
+                  <div class="phone-card">
+                    <div class="phone-card-title">Security Alerts</div>
+                    <div class="phone-alert-item"><div class="phone-alert-dot" style="background:var(--red);"></div><div class="phone-alert-text"><strong style="color:var(--red);">CRITICAL</strong> Brute force: 187 attempts — auto-blocking</div></div>
+                    <div class="phone-alert-item"><div class="phone-alert-dot" style="background:var(--amber);"></div><div class="phone-alert-text"><strong style="color:var(--amber);">WARN</strong> 42 suspicious crawlers detected</div></div>
+                    <div class="phone-alert-item"><div class="phone-alert-dot" style="background:var(--accent);"></div><div class="phone-alert-text">SSL certs valid · TLS 1.3 all endpoints</div></div>
+                  </div>
+                  <div class="phone-card">
+                    <div class="phone-card-title">Quick Actions</div>
+                    <div class="phone-quick-grid">
+                      <div class="phone-quick-btn">🔒 Lock Platform</div>
+                      <div class="phone-quick-btn">📊 Run Report</div>
+                      <div class="phone-quick-btn">🛡 Security Scan</div>
+                      <div class="phone-quick-btn">💬 View Tickets</div>
+                      <div class="phone-quick-btn">⚙ Maintenance</div>
+                      <div class="phone-quick-btn">📧 Send Alert</div>
+                    </div>
+                    <button class="phone-main-btn">Chat with Any Agent →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="setup-guide">
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:14px;">Mobile Remote Management Setup</div>
+            <div class="rec-stack"><strong style="color:var(--accent);">Recommended Stack:</strong> Progressive Web App (PWA) + Telegram Bot (instant push alerts) + Twilio SMS fallback · No app store required · Works on any phone · ~30 min setup</div>
+            <div class="setup-step">
+              <div class="step-num">1</div>
+              <div>
+                <div class="step-title">Deploy as Progressive Web App (PWA)</div>
+                <div class="step-desc">This platform is PWA-ready. Host on Vercel or Netlify — users add it to their home screen like a native app with push notifications.</div>
+                <div class="step-code">npm install -g vercel<br>vercel deploy --prod<br><br># Or Netlify:<br>netlify deploy --prod --dir=./dist</div>
+                <div class="step-note">📱 <span>iOS/Android: visit URL → Share → "Add to Home Screen"</span></div>
+              </div>
+            </div>
+            <div class="setup-step">
+              <div class="step-num">2</div>
+              <div>
+                <div class="step-title">Set Up Telegram Bot for Push Alerts</div>
+                <div class="step-desc">Create a private Telegram bot for real-time security alerts, agent status, and remote commands — all from Telegram on your phone.</div>
+                <div class="step-code">TELEGRAM_BOT_TOKEN=your_bot_token<br>TELEGRAM_CHAT_ID=your_chat_id<br><br># Telegram commands:<br>/status  /agents  /security<br>/block [ip]  /pause [agent]  /report</div>
+                <div class="step-note">⚡ <span>Message @BotFather on Telegram → /newbot to get started</span></div>
+              </div>
+            </div>
+            <div class="setup-step">
+              <div class="step-num">3</div>
+              <div>
+                <div class="step-title">Configure Agent Webhook Endpoints</div>
+                <div class="step-desc">Each AI agent exposes a secure REST API. Your mobile app and Telegram bot call these to get status, send commands, or trigger actions.</div>
+                <div class="step-code">POST /api/agent<br>{ agentId, message, history }<br><br>GET /health<br>GET /api/status</div>
+                <div class="step-note">🔐 <span>All endpoints require JWT auth — configured in your .env file</span></div>
+              </div>
+            </div>
+            <div class="setup-step" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+              <div class="step-num">4</div>
+              <div>
+                <div class="step-title">SMS Fallback via Twilio (Optional)</div>
+                <div class="step-desc">CyberGuard auto-escalates CRITICAL severity events to SMS when Telegram is unavailable.</div>
+                <div class="step-code">TWILIO_SID=your_account_sid<br>TWILIO_TOKEN=your_auth_token<br>ADMIN_PHONE=+1your_number</div>
+                <div class="step-note">💡 <span>CRITICAL threats trigger SMS automatically — no setup beyond adding credentials</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ ALERTS PAGE ═══════════════ -->
+      <div class="page" id="page-alerts">
+        <div class="page-hero">
+          <div class="hero-eyebrow">Watchlist & Monitoring</div>
+          <div class="hero-title">Trade Alerts & Notifications</div>
+          <div class="hero-subtitle">Real-time alerts on shipments, supplier changes, security events, and market movements</div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">Recent Alerts <span class="section-badge" style="color:var(--accent);border-color:rgba(0,229,180,.2);">12 new</span></div>
+          <div class="section-actions">
+            <button class="icon-btn">+ New Alert</button>
+            <button class="icon-btn">Mark All Read</button>
+          </div>
+        </div>
+        <div id="alertsList"></div>
+      </div>
+
+      <!-- ═══════════════ PRICING PAGE ═══════════════ -->
+      <div class="page" id="page-pricing">
+        <div class="page-hero">
+          <div class="hero-eyebrow">Multi-Tier Subscription Platform</div>
+          <div class="hero-title">TradeIntel OS Pricing</div>
+          <div class="hero-subtitle">From solo traders to global enterprises · All plans include AI agents · Annual billing saves 20%</div>
+        </div>
+        <div class="billing-toggle">
+          <span>Monthly</span>
+          <div class="toggle-track" onclick="toggleBilling()">
+            <div class="toggle-thumb on" id="billingToggle"></div>
+          </div>
+          <span style="color:var(--accent);font-weight:500;">Annual <span style="background:rgba(0,229,180,.12);padding:1px 6px;border-radius:2px;font-size:9px;border:1px solid rgba(0,229,180,.25);">SAVE 20%</span></span>
+        </div>
+        <div class="pricing-grid">
+          <div class="price-card">
+            <div class="price-tier">Tier 1</div>
+            <div class="price-name">Starter</div>
+            <div class="price-amount">$49<span>/mo</span></div>
+            <div class="price-desc">For solo traders and researchers exploring global trade data</div>
+            <ul class="price-features">
+              <li>500 shipment searches/month</li>
+              <li>30-day data history</li>
+              <li>US import/export data</li>
+              <li>Basic company profiles</li>
+              <li>CSV export (500 rows)</li>
+              <li>DataPulse Agent (read-only)</li>
+              <li class="no">Global multi-country data</li>
+              <li class="no">AI Trade Leads</li>
+              <li class="no">CyberGuard security</li>
+              <li class="no">Mobile Command Center</li>
+              <li class="no">API access</li>
+            </ul>
+            <button class="price-cta">Get Started</button>
+          </div>
+          <div class="price-card featured">
+            <div class="featured-tag">MOST POPULAR</div>
+            <div class="price-tier">Tier 2</div>
+            <div class="price-name">Professional</div>
+            <div class="price-amount">$199<span>/mo</span></div>
+            <div class="price-desc">For importers, exporters, and sourcing teams needing full intelligence</div>
+            <ul class="price-features">
+              <li>Unlimited shipment searches</li>
+              <li>5-year data history</li>
+              <li>Global data (190+ countries)</li>
+              <li>Full company profiles</li>
+              <li>Unlimited CSV/Excel export</li>
+              <li>DataPulse + TradeScout Agents</li>
+              <li>AI Trade Leads (50/month)</li>
+              <li>Competitor intelligence</li>
+              <li>Seasonality analysis</li>
+              <li>1,000 API calls/month</li>
+              <li class="no">CyberGuard security agent</li>
+              <li class="no">Mobile Command Center</li>
+            </ul>
+            <button class="price-cta featured">Start Free Trial</button>
+          </div>
+          <div class="price-card">
+            <div class="price-tier">Tier 3</div>
+            <div class="price-name">Business</div>
+            <div class="price-amount">$599<span>/mo</span></div>
+            <div class="price-desc">For trading companies, 3PLs, and teams needing AI agents and security</div>
+            <ul class="price-features">
+              <li>Everything in Professional</li>
+              <li>10-year historical data</li>
+              <li>All 5 AI Agents (full access)</li>
+              <li>CyberGuard security monitoring</li>
+              <li>CustomerAI support agent</li>
+              <li>SiteKeeper maintenance agent</li>
+              <li>Unlimited trade leads</li>
+              <li>Mobile Command Center</li>
+              <li>Telegram + SMS alerts</li>
+              <li>10 team seats</li>
+              <li>50,000 API calls/month</li>
+              <li>Priority support (4h SLA)</li>
+            </ul>
+            <button class="price-cta">Get Business</button>
+          </div>
+          <div class="price-card">
+            <div class="price-tier">Tier 4</div>
+            <div class="price-name">Enterprise</div>
+            <div class="price-amount">Custom<span></span></div>
+            <div class="price-desc">For banks, governments, freight forwarders, and large enterprises</div>
+            <ul class="price-features">
+              <li>Everything in Business</li>
+              <li>Custom data integrations</li>
+              <li>White-label platform option</li>
+              <li>Custom AI agent development</li>
+              <li>Dedicated infrastructure</li>
+              <li>Unlimited seats & API</li>
+              <li>SOC2 / GDPR compliance</li>
+              <li>On-premise deployment option</li>
+              <li>Custom data retention</li>
+              <li>24/7 dedicated support</li>
+              <li>99.99% uptime SLA</li>
+              <li>Custom model fine-tuning</li>
+            </ul>
+            <button class="price-cta">Contact Sales</button>
+          </div>
+        </div>
+        <div class="section-header"><div class="section-title">AI Agent Availability by Plan</div></div>
+        <div class="agent-features-grid">
+          <div class="agent-feat-item"><div class="agent-feat-dot" style="background:var(--agent-cyber);"></div><div><div class="agent-feat-name">🛡 CyberGuard — Security Agent</div><div class="agent-feat-desc">Real-time threat detection · DDoS mitigation · Intrusion response · Business+</div></div></div>
+          <div class="agent-feat-item"><div class="agent-feat-dot" style="background:var(--agent-cx);"></div><div><div class="agent-feat-name">💬 CustomerAI — Support Agent</div><div class="agent-feat-desc">Handles inquiries, onboarding, billing questions · Business+</div></div></div>
+          <div class="agent-feat-item"><div class="agent-feat-dot" style="background:var(--agent-data);"></div><div><div class="agent-feat-name">📊 DataPulse — Analytics Agent</div><div class="agent-feat-desc">Automated reports, anomaly detection, KPI alerts · All plans</div></div></div>
+          <div class="agent-feat-item"><div class="agent-feat-dot" style="background:var(--agent-site);"></div><div><div class="agent-feat-name">⚙ SiteKeeper — Maintenance Agent</div><div class="agent-feat-desc">Performance monitoring, cache, DB optimization · Business+</div></div></div>
+          <div class="agent-feat-item"><div class="agent-feat-dot" style="background:var(--agent-trade);"></div><div><div class="agent-feat-name">🔍 TradeScout — Intelligence Agent</div><div class="agent-feat-desc">Lead identification, market gaps, seasonal alerts · Professional+</div></div></div>
+          <div class="agent-feat-item"><div class="agent-feat-dot" style="background:var(--text-muted);"></div><div><div class="agent-feat-name">📱 Mobile Command Center</div><div class="agent-feat-desc">Remote agent management, Telegram alerts, SMS fallback · Business+</div></div></div>
+        </div>
+        <div class="section-header"><div class="section-title">Full Feature Comparison</div></div>
+        <div class="plan-matrix-wrap">
+          <table class="plan-matrix">
+            <thead><tr><th>Feature</th><th>Starter $49</th><th>Professional $199</th><th>Business $599</th><th>Enterprise</th></tr></thead>
+            <tbody id="featureMatrixBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- SHIPMENT DETAIL DRAWER -->
+<div class="overlay" id="detailOverlay" onclick="handleOverlayClick(event)">
+  <div class="drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">Shipment Detail</span>
+      <button class="drawer-close" onclick="closeDrawer()">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   TRADEINTEL OS — MASTER JAVASCRIPT
+   
+   CONFIGURATION: Edit CONFIG object below to customize behavior
+   API: All backend calls go through API object — easy to modify
+   DATA: All mock data generators in DATA object
+   UI: All UI interactions in UI object
+   AGENTS: All AI agent logic in AGENTS object
+   CHARTS: All chart builders in CHARTS object
+═══════════════════════════════════════════════════════════════ */
+
+/* ── CONFIGURATION (edit this to customize) ── */
+const CONFIG = {
+  // Backend URL — update this to your Railway URL
+  BACKEND_URL: 'https://tradeintel-backend-production.up.railway.app',
+  
+  // AI Models per agent (mixed strategy for cost/quality balance)
+  AGENT_MODELS: {
+    cyberguard: 'claude-sonnet-4-20250514',  // Speed critical
+    customerai:  'claude-sonnet-4-20250514',  // Fast responses
+    datapulse:   'claude-opus-4-20250514',    // Deep analysis
+    sitekeeper:  'claude-sonnet-4-20250514',  // Routine tasks
+    tradescout:  'claude-opus-4-20250514',    // Complex intelligence
+  },
+  
+  // Subscription tiers
+  TIERS: {
+    starter:      { searches: 500,  history: 30,   agents: ['datapulse'] },
+    professional: { searches: -1,   history: 1825, agents: ['datapulse','tradescout'] },
+    business:     { searches: -1,   history: 3650, agents: ['cyberguard','customerai','datapulse','sitekeeper','tradescout'] },
+    enterprise:   { searches: -1,   history: -1,   agents: ['cyberguard','customerai','datapulse','sitekeeper','tradescout'] },
+  },
+  
+  // Current user plan
+  CURRENT_PLAN: 'enterprise',
+  
+  // Security event refresh interval (ms)
+  SECURITY_REFRESH_MS: 4000,
+};
+
+/* ── API LAYER (all backend calls go here) ── */
+const API = {
+  baseUrl: CONFIG.BACKEND_URL,
+  connected: false,
+  
+  async checkConnection() {
+    try {
+      const res = await fetch(`${this.baseUrl}/health`, { signal: AbortSignal.timeout(5000) });
+      const data = await res.json();
+      this.connected = data.status === 'healthy';
+      return this.connected;
+    } catch {
+      this.connected = false;
+      return false;
+    }
+  },
+  
+  async chatWithAgent(agentId, message, history = []) {
+    try {
+      const msgs = history.length > 0 ? history : [{ role: 'user', content: message }];
+      const res = await fetch(`${this.baseUrl}/api/agent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId, message, history: msgs }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const data = await res.json();
+      if (data.success) return data.response;
+      throw new Error(data.error || 'Agent error');
+    } catch (err) {
+      // Fallback demo response when backend unavailable
+      return AGENTS.demoResponse(agentId, message);
+    }
+  },
+};
+
+/* ── DATA GENERATORS ── */
+const DATA = {
+  suppliers: ['Foxconn Technology Co.','Pegatron Corporation','Quanta Computer Inc.','Wistron Corporation','Luxshare Precision Industry','BYD Electronic (Intl)','Delta Electronics Inc.','Compal Electronics Inc.','Jabil Circuit Inc.','Hon Hai Precision Ind.'],
+  buyers: ['Apple Inc.','Samsung Electronics America','Amazon.com Services','Best Buy Co. Inc.','Walmart Stores Inc.','Target Corporation','Microsoft Corporation','Dell Technologies','HP Inc.','Lenovo (United States)'],
+  countries: [{f:'🇨🇳',n:'China'},{f:'🇻🇳',n:'Vietnam'},{f:'🇮🇳',n:'India'},{f:'🇩🇪',n:'Germany'},{f:'🇰🇷',n:'S. Korea'},{f:'🇲🇽',n:'Mexico'},{f:'🇹🇼',n:'Taiwan'},{f:'🇧🇩',n:'Bangladesh'},{f:'🇯🇵',n:'Japan'}],
+  hsCodes: ['8471.30','8517.12','6110.20','2709.00','8703.22','8708.99','9013.80','6204.62','8528.72','3004.90'],
+  hsDesc: {'8471.30':'Laptop / ADP Machines','8517.12':'Smartphones / Cellular','6110.20':'Jerseys - Cotton','2709.00':'Crude Petroleum','8703.22':'Passenger Cars','8708.99':'Auto Parts','9013.80':'LCD Devices','6204.62':'Cotton Trousers','8528.72':'Display Monitors','3004.90':'Medicaments'},
+  ports: ['Los Angeles, CA','Long Beach, CA','New York, NY','Houston, TX','Seattle, WA','Savannah, GA'],
+  
+  r: (a,b) => Math.floor(Math.random()*(b-a+1)+a),
+  fmtN: n => n>=1e9?'$'+(n/1e9).toFixed(2)+'B':n>=1e6?'$'+(n/1e6).toFixed(1)+'M':n>=1e3?'$'+(n/1e3).toFixed(0)+'K':'$'+n,
+  fmtC: n => n.toLocaleString(),
+  rDate: (s,e) => { const d=new Date(s.getTime()+Math.random()*(e.getTime()-s.getTime())); return d.toISOString().split('T')[0]; },
+  
+  shipments: null,
+  
+  getShipments() {
+    if (this.shipments) return this.shipments;
+    this.shipments = Array.from({length:150},(_,i) => {
+      const hs = this.hsCodes[this.r(0,this.hsCodes.length-1)];
+      const orig = this.countries[this.r(0,this.countries.length-1)];
+      return {
+        id: i,
+        date: this.rDate(new Date(2024,0,1),new Date(2024,11,31)),
+        shipper: this.suppliers[this.r(0,this.suppliers.length-1)],
+        consignee: this.buyers[this.r(0,this.buyers.length-1)],
+        hs, desc: this.hsDesc[hs]||'General Merchandise',
+        origin: `${orig.f} ${orig.n}`,
+        dest: '🇺🇸 United States',
+        weight: this.r(500,85000),
+        value: this.r(15000,4500000),
+        teu: (this.r(1,8)/2).toFixed(1),
+        type: Math.random()>0.3?'import':'export',
+        port: this.ports[this.r(0,this.ports.length-1)],
+      };
+    }).sort((a,b) => b.date.localeCompare(a.date));
+    return this.shipments;
+  },
+};
+
+/* ── AGENT DEFINITIONS ── */
+const AGENTS = {
+  definitions: [
+    {
+      id: 'cyberguard',
+      name: 'CyberGuard',
+      role: 'Cybersecurity & Threat Defense',
+      color: 'var(--agent-cyber)',
+      colorRgb: '239,68,68',
+      icon: '🛡',
+      status: 'alert',
+      statusText: '2 active threats',
+      stats: [{l:'Blocked today',v:'4,821'},{l:'Block rate',v:'98.7%'},{l:'Response',v:'<50ms'}],
+      log: '[14:22] Brute force 103.21.244.x → blocked\n[14:18] SQL injection → WAF blocked\n[14:11] SSL certs verified → A+',
+      model: 'claude-sonnet-4-20250514',
+      systemPrompt: 'You are CyberGuard, a cybersecurity AI agent for TradeIntel global trade platform. You monitor threats, block attacks, analyze vulnerabilities, detect intrusions, and provide security recommendations. Be concise, technical, and prioritize user safety. Format responses clearly with severity levels when reporting threats.',
+    },
+    {
+      id: 'customerai',
+      name: 'CustomerAI',
+      role: 'Customer Support & Onboarding',
+      color: 'var(--agent-cx)',
+      colorRgb: '0,153,255',
+      icon: '💬',
+      status: 'online',
+      statusText: '3 active chats',
+      stats: [{l:'Resolved today',v:'142'},{l:'CSAT score',v:'4.8/5'},{l:'Avg response',v:'<2s'}],
+      log: '[14:20] User #4821 onboarding done\n[14:15] Billing question resolved\n[14:09] API integration support sent',
+      model: 'claude-sonnet-4-20250514',
+      systemPrompt: 'You are CustomerAI, a helpful customer support agent for TradeIntel, a global trade intelligence platform. Help users with account issues, data questions, billing, onboarding, and platform features. Be friendly, professional, and accurate. Always try to resolve issues in a single response.',
+    },
+    {
+      id: 'datapulse',
+      name: 'DataPulse',
+      role: 'Analytics & Critical Metrics',
+      color: 'var(--agent-data)',
+      colorRgb: '0,229,180',
+      icon: '📊',
+      status: 'online',
+      statusText: 'Generating report',
+      stats: [{l:'Reports today',v:'34'},{l:'Anomalies',v:'7 flagged'},{l:'Pipeline',v:'12/12 OK'}],
+      log: '[14:21] Weekly trade volume report done\n[14:17] Anomaly: VN→US electronics +34%\n[14:05] All 12 data feeds healthy',
+      model: 'claude-opus-4-20250514',
+      systemPrompt: 'You are DataPulse, a data analytics AI agent for TradeIntel. You analyze trade data, generate reports, identify anomalies, track KPIs, monitor data pipeline health, and provide data-driven insights. Always include specific numbers and trends. Use structured formats for reports.',
+    },
+    {
+      id: 'sitekeeper',
+      name: 'SiteKeeper',
+      role: 'Website Maintenance & Infrastructure',
+      color: 'var(--agent-site)',
+      colorRgb: '167,139,250',
+      icon: '⚙',
+      status: 'online',
+      statusText: 'All systems OK',
+      stats: [{l:'Issues fixed',v:'12'},{l:'Cache hits',v:'94.2%'},{l:'DB response',v:'142ms'}],
+      log: '[14:19] CDN cache cleared → +12% perf\n[14:14] Slow query optimized\n[14:08] SSL cert renewed (90 days)',
+      model: 'claude-sonnet-4-20250514',
+      systemPrompt: 'You are SiteKeeper, a website maintenance AI agent for TradeIntel. You monitor infrastructure, optimize performance, manage deployments, clear caches, diagnose issues, and ensure platform stability. Be technical, proactive, and provide specific actionable recommendations.',
+    },
+    {
+      id: 'tradescout',
+      name: 'TradeScout',
+      role: 'Trade Intelligence & Lead Generation',
+      color: 'var(--agent-trade)',
+      colorRgb: '245,158,11',
+      icon: '🔍',
+      status: 'online',
+      statusText: 'Scanning leads',
+      stats: [{l:'Leads found',v:'247'},{l:'Avg score',v:'78/100'},{l:'Markets',v:'42 scanned'}],
+      log: '[14:20] 8 new VN furniture exporters found\n[14:16] Lead #247: MX auto parts score 94\n[14:10] Seasonal alert: Apparel peak soon',
+      model: 'claude-opus-4-20250514',
+      systemPrompt: 'You are TradeScout, a trade intelligence AI agent for TradeIntel. You identify trade leads, analyze market opportunities, track competitor movements, detect seasonal trends, and find supplier-buyer matches using shipment data. Provide specific, actionable intelligence with HS codes, country data, and market sizing.',
+    },
+  ],
+  
+  demoResponse(agentId, message) {
+    const responses = {
+      cyberguard: `🛡 **CyberGuard Security Report**\n\nCurrent threat level: ELEVATED\n\n• 2 active investigations: brute force from 103.21.x (187 attempts) and SQL injection attempts\n• 4,821 requests blocked in the past 24 hours\n• All SSL certificates valid — TLS 1.3 on all endpoints\n• WAF rules operational\n\nRegarding your query: "${message}" — I'm analyzing this now. In demo mode; connect backend for live AI responses.`,
+      customerai: `Hi there! I'm CustomerAI, your TradeIntel support agent.\n\nI'd be happy to help you with: "${message}"\n\nFor immediate assistance:\n• Account issues → Settings > Account\n• Billing → Settings > Billing  \n• Data questions → our documentation\n\nCurrently running in demo mode. Connect your backend API for live AI responses!`,
+      datapulse: `📊 **DataPulse Analytics Summary**\n\nRegarding: "${message}"\n\nKey metrics snapshot:\n• Platform uptime: 99.94%\n• Active users: 12,847 (↑18.4%)\n• MRR: $284K (↑12.1%)\n• API calls today: 4.2M\n• Data freshness: 2.4 hours\n\nAll 12 data pipeline feeds are healthy. Running in demo mode — connect backend for live analysis.`,
+      sitekeeper: `⚙ **SiteKeeper Infrastructure Report**\n\nAll systems operational.\n\nRegarding: "${message}"\n\n• Server response: 142ms (P95)\n• Cache hit rate: 94.2%\n• Database queries: optimized\n• CDN: active on all regions\n• Memory usage: 68% (normal)\n\nNo issues detected. Running in demo mode — connect backend for live monitoring.`,
+      tradescout: `🔍 **TradeScout Intelligence Brief**\n\nRegarding: "${message}"\n\nTop opportunities identified today:\n1. Vietnamese furniture exporters (247 active, $2.4B opportunity)\n2. Mexican auto parts nearshoring (521 shippers, 34% growth)\n3. Indian pharma EU expansion (342 exporters, USFDA approved)\n\nLead scores range 71-94. Running in demo mode — connect backend for live AI intelligence.`,
+    };
+    return responses[agentId] || responses.datapulse;
+  },
+};
+
+/* ── ACTIVE STATE ── */
+let currentAgent = AGENTS.definitions[0];
+let chatHistory = [];
+
+/* ═══════════════════════════════════════════════════════════════
+   INITIALIZATION
+═══════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  // Build all UI components
+  UI.buildTicker();
+  UI.buildShipmentTable();
+  UI.buildAgentCards();
+  UI.buildAgentSelector();
+  UI.buildLeads();
+  UI.buildCompetitors();
+  UI.buildAlerts();
+  UI.buildTradeLanes();
+  UI.buildSecurity();
+  UI.buildMetricsSupport();
+  UI.buildFeatureMatrix();
+  UI.buildCompanyTabs();
+  
+  // Start security event stream
+  UI.startSecurityStream();
+  
+  // Build charts after short delay for layout
+  setTimeout(() => CHARTS.buildAll(), 150);
+  
+  // Check backend connection
+  const connected = await API.checkConnection();
+  UI.updateConnectionStatus(connected);
+  
+  // Init agent chat
+  AGENTS_UI.initChat();
+  
+  // Chip interactions
+  document.addEventListener('click', e => {
+    if (e.target.classList.contains('chip')) {
+      const group = e.target.closest('.chip-group');
+      if (!group) return;
+      const isAll = e.target.textContent.trim() === 'All';
+      if (isAll) { group.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); e.target.classList.add('active'); }
+      else { group.querySelector('.chip:first-child')?.classList.remove('active'); e.target.classList.toggle('active'); }
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   UI BUILDERS
+═══════════════════════════════════════════════════════════════ */
+const UI = {
+  buildTicker() {
+    const el = document.getElementById('tickerTrack');
+    if (!el) return;
+    const items = [
+      {l:'US IMPORTS',v:'$3.14T YTD',c:'+8.2%',up:true},
+      {l:'US EXPORTS',v:'$2.89T YTD',c:'+6.4%',up:true},
+      {l:'TRANSPACIFIC TEU',v:'18.4M',c:'+12.1%',up:true},
+      {l:'FBX FREIGHT INDEX',v:'$2,840',c:'-4.2%',up:false},
+      {l:'CN→US IMPORTS',v:'$542B YTD',c:'-2.8%',up:false},
+      {l:'VN→US IMPORTS',v:'$98.4B YTD',c:'+28.7%',up:true},
+      {l:'MX→US IMPORTS',v:'$186B YTD',c:'+22.1%',up:true},
+      {l:'CONTAINER RATE',v:'$1,920/FEU',c:'-8.4%',up:false},
+      {l:'ACTIVE VESSELS',v:'5,842',c:'+1.2%',up:true},
+      {l:'PORT THROUGHPUT',v:'46.8M TEU',c:'+9.3%',up:true},
+      {l:'PLATFORM USERS',v:'12,847',c:'+18.4%',up:true},
+      {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
+    ];
+    const html = items.map(i => `<div class="ticker-item"><span class="ticker-label">${i.l}</span><span class="ticker-value">${i.v}</span><span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span></div>`).join('');
+    el.innerHTML = html + html;
+  },
+  
+  buildShipmentTable() {
+    const tb = document.getElementById('shipmentTableBody');
+    if (!tb) return;
+    tb.innerHTML = '';
+    Data.getShipments().slice(0,25).forEach((s,i) => {
+      const pct = Math.min(100, Math.round(s.value/4500000*100));
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td-mono">${s.date}</td>
+        <td><div class="td-company" onclick="UI.openShipmentDetail(${s.id})">${s.shipper}</div></td>
+        <td style="font-size:11px;color:var(--text-secondary);">${s.consignee}</td>
+        <td class="td-hs">${s.hs}</td>
+        <td style="font-size:10px;color:var(--text-muted);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.desc}</td>
+        <td style="font-size:11px;">${s.origin}</td>
+        <td style="font-size:11px;">${s.dest}</td>
+        <td class="td-right">${DATA.fmtC(s.weight)}</td>
+        <td class="td-right"><div class="td-value">${DATA.fmtN(s.value)}</div><div class="value-bar"><div class="value-bar-fill" style="width:${pct}%;"></div></div></td>
+        <td class="td-right">${s.teu}</td>
+        <td><span class="badge ${s.type==='import'?'badge-import':'badge-export'}">${s.type}</span></td>
+        <td><div class="row-actions"><button class="row-btn" onclick="UI.openShipmentDetail(${s.id})">Detail</button><button class="row-btn">Track</button></div></td>
+      `;
+      tb.appendChild(tr);
+    });
+  },
+  
+  openShipmentDetail(id) {
+    const s = DATA.getShipments().find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="detail-grid">
+        <div class="detail-card"><div class="detail-card-label">Shipper</div><div class="detail-card-value">${s.shipper}</div><div class="detail-card-sub">${s.origin}</div></div>
+        <div class="detail-card"><div class="detail-card-label">Consignee</div><div class="detail-card-value">${s.consignee}</div><div class="detail-card-sub">🇺🇸 United States</div></div>
+      </div>
+      <div class="detail-card" style="margin-bottom:12px;">
+        <div class="detail-card-label" style="margin-bottom:10px;">Shipment Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;">
+          <div><span style="color:var(--text-muted);">Date: </span><span style="font-family:var(--font-mono);">${s.date}</span></div>
+          <div><span style="color:var(--text-muted);">HS Code: </span><span style="color:var(--blue);font-family:var(--font-mono);">${s.hs}</span></div>
+          <div><span style="color:var(--text-muted);">Value: </span><span style="color:var(--accent);font-family:var(--font-mono);font-weight:600;">${DATA.fmtN(s.value)}</span></div>
+          <div><span style="color:var(--text-muted);">Weight: </span><span style="font-family:var(--font-mono);">${DATA.fmtC(s.weight)} KG</span></div>
+          <div><span style="color:var(--text-muted);">TEU: </span><span style="font-family:var(--font-mono);">${s.teu}</span></div>
+          <div><span style="color:var(--text-muted);">Type: </span><span class="badge ${s.type==='import'?'badge-import':'badge-export'}">${s.type}</span></div>
+          <div style="grid-column:span 2;"><span style="color:var(--text-muted);">Product: </span>${s.desc}</div>
+        </div>
+      </div>
+      <div class="detail-card" style="margin-bottom:14px;">
+        <div class="detail-card-label" style="margin-bottom:10px;">Logistics</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;">
+          <div><span style="color:var(--text-muted);">Port: </span>${s.port}</div>
+          <div><span style="color:var(--text-muted);">Vessel: </span><span style="font-family:var(--font-mono);">EVER GIVEN</span></div>
+          <div><span style="color:var(--text-muted);">Carrier: </span>Evergreen Line</div>
+          <div><span style="color:var(--text-muted);">B/L: </span><span style="font-family:var(--font-mono);">EGLV${DATA.r(100000,999999)}</span></div>
+          <div><span style="color:var(--text-muted);">Transit: </span><span style="font-family:var(--font-mono);">${DATA.r(12,28)} days</span></div>
+          <div><span style="color:var(--text-muted);">Status: </span><span style="color:var(--accent);">Delivered</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="icon-btn" style="flex:1;justify-content:center;">Supplier Profile</button>
+        <button class="icon-btn" style="flex:1;justify-content:center;">Similar Shipments</button>
+        <button class="icon-btn accent" style="flex:1;justify-content:center;">+ Track</button>
+      </div>
+    `;
+    document.getElementById('detailOverlay').classList.add('open');
+  },
+  
+  buildAgentCards() {
+    const el = document.getElementById('agentCardsContainer');
+    if (!el) return;
+    el.innerHTML = AGENTS.definitions.map(a => `
+      <div class="agent-card">
+        <div class="agent-card-header">
+          <div class="agent-icon" style="background:rgba(${a.colorRgb},.1);font-size:18px;">${a.icon}</div>
+          <div class="agent-info">
+            <div class="agent-name">${a.name}</div>
+            <div class="agent-role">${a.role}</div>
+          </div>
+          <div class="agent-status-badge ${a.status}">
+            <div class="pulse ${a.status==='alert'?'red':'green'}"></div>
+            ${a.statusText}
+          </div>
+        </div>
+        <div style="padding:12px 16px 0;">
+          <div class="agent-stats">${a.stats.map(s => `<div class="agent-stat"><div class="agent-stat-label">${s.l}</div><div class="agent-stat-value">${s.v}</div></div>`).join('')}</div>
+          <div class="agent-log"><span>${a.log.replace(/\n/g,'<br>')}</span></div>
+        </div>
+        <div class="agent-actions">
+          <button class="agent-btn primary" onclick="AGENTS_UI.openChat('${a.id}')">Chat with Agent</button>
+          <button class="agent-btn" onclick="askAgent('${a.id}','Give me a brief status report')">Status</button>
+          <button class="agent-btn danger" onclick="askAgent('${a.id}','Pause your current tasks and stand by')">Pause</button>
+        </div>
+      </div>
+    `).join('');
+  },
+  
+  buildAgentSelector() {
+    const el = document.getElementById('agentSelector');
+    if (!el) return;
+    const colors = { cyberguard: 'var(--agent-cyber)', customerai: 'var(--agent-cx)', datapulse: 'var(--agent-data)', sitekeeper: 'var(--agent-site)', tradescout: 'var(--agent-trade)' };
+    el.innerHTML = AGENTS.definitions.map((a,i) => `
+      <button class="agent-sel-btn ${i===0?'active':''}" 
+        style="${i===0?`background:rgba(${a.colorRgb},.12);border-color:rgba(${a.colorRgb},.3);color:${a.color};`:''}" 
+        onclick="AGENTS_UI.selectAgent(this,'${a.id}','${a.colorRgb}')"
+        data-color="${a.color}" data-rgb="${a.colorRgb}">
+        ${a.icon} ${a.name}
+      </button>
+    `).join('');
+  },
+  
+  buildLeads() {
+    const el = document.getElementById('leadsContainer');
+    if (!el) return;
+    const leads = [
+      {t:'High-growth Vietnamese furniture exporters — underserved US market',s:94,tags:[{l:'Furniture HS 9401',c:'product'},{l:'Vietnam 🇻🇳',c:'country'},{l:'HS 9401',c:'hs'}],m:'847 shippers · $2.4B opportunity · 28% YoY growth',sum:'18 new exporters with no current US buyer relationships. Peak season Sep-Nov.'},
+      {t:'Indian pharma exporters seeking EU distribution — USFDA approved',s:88,tags:[{l:'Pharmaceuticals HS 3004',c:'product'},{l:'India 🇮🇳',c:'country'},{l:'EU Market',c:'country'}],m:'342 shippers · $1.8B · 22% YoY growth',sum:'Regulatory alignment improving. GDPR-compliant sourcing opportunities available.'},
+      {t:'Mexico nearshoring auto parts — EV supply chain tier-2 opportunities',s:82,tags:[{l:'Auto Parts HS 8708',c:'product'},{l:'Mexico 🇲🇽',c:'country'},{l:'HS 8708',c:'hs'}],m:'521 shippers · $4.2B · 34% YoY growth',sum:'Surge in US-Mexico EV supply chain. Key nearshoring opportunity for tier-2 suppliers.'},
+      {t:'Bangladesh apparel — Q4 peak season capacity available now',s:76,tags:[{l:'Apparel HS 6110',c:'product'},{l:'Bangladesh 🇧🇩',c:'country'},{l:'Seasonal Q4',c:'hs'}],m:'1,240 shippers · $890M · Seasonal peak window',sum:'Seasonality analysis shows 40% volume spike Sep-Dec. 89 exporters with underutilized Q3 capacity.'},
+      {t:'Taiwan semiconductor components — CHIPS Act alignment opportunities',s:71,tags:[{l:'Semiconductors HS 8542',c:'product'},{l:'Taiwan 🇹🇼',c:'country'},{l:'HS 8542',c:'hs'}],m:'98 shippers · $6.8B · CHIPS Act aligned',sum:'Post-CHIPS Act tariff landscape creates new sourcing patterns. 12 key suppliers identified.'},
+    ];
+    el.innerHTML = leads.map(l => `
+      <div class="lead-card">
+        <div class="lead-header">
+          <div class="lead-title">${l.t}</div>
+          <div class="lead-score-wrap"><div class="lead-score-value">${l.s}</div><div class="lead-score-label">Lead Score</div></div>
+        </div>
+        <div class="lead-tags">${l.tags.map(t => `<span class="lead-tag ${t.c}">${t.l}</span>`).join('')}</div>
+        <div class="lead-summary">${l.sum}</div>
+        <div class="lead-meta">${l.m}</div>
+        <div class="lead-actions">
+          <button class="icon-btn">View Shippers</button>
+          <button class="icon-btn">Market Analysis</button>
+          <button class="icon-btn accent">+ Track Lead</button>
+        </div>
+      </div>
+    `).join('');
+  },
+  
+  buildCompetitors() {
+    const el = document.getElementById('competitorList');
+    if (!el) return;
+    const comps = [
+      {r:1,n:'Apple Inc.',d:'Electronics · 🇺🇸 United States',v:'$284B',s:28,c:'#00e5b4'},
+      {r:2,n:'Samsung Electronics America',d:'Electronics · 🇰🇷 S. Korea',v:'$182B',s:18,c:'#0099ff'},
+      {r:3,n:'Lenovo (United States)',d:'Computers · 🇨🇳 China',v:'$141B',s:14,c:'#a78bfa'},
+      {r:4,n:'HP Inc.',d:'Computers · 🇺🇸 United States',v:'$121B',s:12,c:'#f59e0b'},
+      {r:5,n:'Dell Technologies',d:'Servers/Laptops · 🇺🇸 United States',v:'$101B',s:10,c:'#ef4444'},
+      {r:6,n:'Microsoft Corporation',d:'Hardware · 🇺🇸 United States',v:'$81B',s:8,c:'#2dd4bf'},
+      {r:7,n:'Asus Computer International',d:'Consumer Electronics · 🇹🇼 Taiwan',v:'$61B',s:6,c:'#ec4899'},
+      {r:8,n:'Acer America Corp.',d:'Laptops / Monitors · 🇹🇼 Taiwan',v:'$40B',s:4,c:'#3d5066'},
+    ];
+    el.innerHTML = comps.map(c => `
+      <div class="comp-row">
+        <div class="comp-rank">#${c.r}</div>
+        <div class="comp-info"><div class="comp-name">${c.n}</div><div class="comp-detail">${c.d}</div></div>
+        <div class="comp-bar-wrap"><div class="comp-bar-fill" style="width:${c.s*3}%;background:${c.c};"></div></div>
+        <div class="comp-share">${c.s}%</div>
+        <div class="comp-value">${c.v}</div>
+        <button class="row-btn" style="margin-left:8px;">Analyze</button>
+      </div>
+    `).join('');
+  },
+  
+  buildAlerts() {
+    const el = document.getElementById('alertsList');
+    if (!el) return;
+    const alerts = [
+      {dot:'g',tag:'new',title:'New supplier identified: Luxshare Precision Industry shipped to Apple Inc.',time:'2 minutes ago'},
+      {dot:'b',tag:'new',title:'Shipment volume spike: Vietnam → US electronics up 34% this week vs 4-week average.',time:'18 minutes ago'},
+      {dot:'g',tag:'new',title:'New trade lane: India → Netherlands pharmaceutical shipments — 8 new exporters this month.',time:'1 hour ago'},
+      {dot:'r',tag:'critical',title:'CyberGuard: Brute force attack detected — 187 attempts from 103.21.244.x — auto-blocked.',time:'1.5 hours ago'},
+      {dot:'b',tag:'update',title:'Competitor alert: Samsung Electronics increased supplier count from 18 to 24 in Q4.',time:'3 hours ago'},
+      {dot:'b',tag:'update',title:'Seasonality: Apparel (HS 6110) entering peak season — historically 40% volume increase Oct-Dec.',time:'6 hours ago'},
+      {dot:'b',tag:'update',title:'Port congestion: Los Angeles showing 3.2 day average dwell time, up from 1.8 days last week.',time:'12 hours ago'},
+      {dot:'g',tag:'new',title:'Trade lead: 14 Mexican auto parts suppliers match your search criteria — nearshoring opportunities.',time:'1 day ago'},
+    ];
+    const dotColors = {g:'var(--accent)',b:'var(--blue)',a:'var(--amber)',r:'var(--red)'};
+    const tagClass = {new:'new',update:'update',critical:'critical'};
+    el.innerHTML = alerts.map(a => `
+      <div class="alert-item">
+        <div class="alert-dot" style="background:${dotColors[a.dot]};"></div>
+        <div class="alert-body">
+          <div class="alert-title">${a.title}</div>
+          <div class="alert-time">${a.time}</div>
+        </div>
+        <span class="alert-tag ${tagClass[a.tag]}">${a.tag.toUpperCase()}</span>
+      </div>
+    `).join('');
+  },
+  
+  buildTradeLanes() {
+    const tb = document.getElementById('tradeLaneBody');
+    if (!tb) return;
+    const lanes = [
+      {lane:'🇨🇳 China → 🇺🇸 United States',ships:4821,value:'$98.4B',yoy:'+12.3%',up:true},
+      {lane:'🇻🇳 Vietnam → 🇺🇸 United States',ships:1240,value:'$24.1B',yoy:'+28.7%',up:true},
+      {lane:'🇩🇪 Germany → 🇺🇸 United States',ships:892,value:'$18.2B',yoy:'-2.1%',up:false},
+      {lane:'🇮🇳 India → 🇺🇸 United States',ships:741,value:'$14.7B',yoy:'+19.4%',up:true},
+      {lane:'🇰🇷 S. Korea → 🇺🇸 United States',ships:614,value:'$12.3B',yoy:'+4.8%',up:true},
+      {lane:'🇲🇽 Mexico → 🇺🇸 United States',ships:582,value:'$11.8B',yoy:'+22.1%',up:true},
+    ];
+    tb.innerHTML = lanes.map(l => `
+      <tr>
+        <td style="font-size:12px;font-weight:500;">${l.lane}</td>
+        <td class="td-right" style="color:var(--text-secondary);">${DATA.fmtC(l.ships)}</td>
+        <td class="td-right" style="font-weight:600;">${l.value}</td>
+        <td class="td-right" style="color:${l.up?'var(--accent)':'var(--red)'};font-family:var(--font-mono);font-weight:600;">${l.yoy}</td>
+        <td><div style="display:flex;gap:2px;">${Array.from({length:12},(_,k) => `<div style="width:5px;height:${16+DATA.r(-6,12)}px;background:${l.up?'rgba(0,229,180,0.5)':'rgba(239,68,68,0.5)'};border-radius:1px 1px 0 0;"></div>`).join('')}</div></td>
+      </tr>
+    `).join('');
+  },
+  
+  buildSecurity() {
+    // Firewall chart
+    const fw = document.getElementById('firewallChart');
+    if (fw) {
+      fw.innerHTML = Array.from({length:24},(_,i) => {
+        const v = DATA.r(20,100);
+        const col = v>80?'rgba(239,68,68,.65)':v>60?'rgba(245,158,11,.55)':'rgba(0,229,180,.45)';
+        return `<div class="fw-bar" style="height:${Math.max(4,v/10)}px;background:${col};" title="${i}:00 — ${v*48} blocked"></div>`;
+      }).join('');
+    }
+    // Event stream
+    const es = document.getElementById('eventStream');
+    if (es) {
+      const events = [
+        {t:'14:22:08',sev:'CRITICAL',sc:'sev-critical',dc:'r',msg:'Brute force attack — IP 103.21.244.187 — 187 attempts in 2min — Auto-blocked'},
+        {t:'14:20:41',sev:'WARN',sc:'sev-warning',dc:'a',msg:'SQL injection attempt in search parameter — WAF rule #4821 triggered'},
+        {t:'14:18:33',sev:'WARN',sc:'sev-warning',dc:'a',msg:'42 bot crawlers detected — Rate limiting applied — 6 IPs flagged'},
+        {t:'14:15:12',sev:'INFO',sc:'sev-info',dc:'b',msg:'SSL certificate verified — tradeintel.com — Valid 89 days — Grade A+'},
+        {t:'14:12:05',sev:'OK',sc:'sev-ok',dc:'g',msg:'DDoS mitigation layer active — Cloudflare: all regions nominal'},
+        {t:'14:09:44',sev:'INFO',sc:'sev-info',dc:'b',msg:'Failed login x12 — account temporarily locked — admin notified'},
+        {t:'14:07:22',sev:'OK',sc:'sev-ok',dc:'g',msg:'Security headers verified — CSP, HSTS, X-Frame-Options all present'},
+        {t:'14:04:11',sev:'WARN',sc:'sev-warning',dc:'a',msg:'Geo-blocked request from high-risk region — 12 IPs blocked this hour'},
+        {t:'14:01:58',sev:'OK',sc:'sev-ok',dc:'g',msg:'Database encryption verified — AES-256 at rest — TLS 1.3 in transit'},
+        {t:'13:58:30',sev:'INFO',sc:'sev-info',dc:'b',msg:'API rate limit hit — user #4821 — 429 response — auto-notified'},
+      ];
+      const dc = {r:'var(--red)',a:'var(--amber)',b:'var(--blue)',g:'var(--accent)'};
+      es.innerHTML = events.map(e => `
+        <div class="event-row">
+          <div class="event-dot" style="background:${dc[e.dc]};"></div>
+          <div class="event-time">${e.t}</div>
+          <span class="event-sev ${e.sc}">${e.sev}</span>
+          <div class="event-body">${e.msg}</div>
+        </div>
+      `).join('');
+    }
+  },
+  
+  startSecurityStream() {
+    setInterval(() => {
+      const es = document.getElementById('eventStream');
+      const pg = document.getElementById('page-security');
+      if (!es || !pg?.classList.contains('active')) return;
+      const evts = ['Bot crawler detected — rate limiting applied','API rate limit hit — user #'+DATA.r(1000,9999),'SSL handshake completed — TLS 1.3','Login attempt — 2FA required — sent','CDN cache cleared — performance +8%'];
+      const row = document.createElement('div');
+      row.className = 'event-row';
+      row.innerHTML = `<div class="event-dot" style="background:var(--accent);"></div><div class="event-time">${new Date().toLocaleTimeString()}</div><span class="event-sev sev-info">INFO</span><div class="event-body">${evts[DATA.r(0,evts.length-1)]}</div>`;
+      es.insertBefore(row, es.firstChild);
+      if (es.children.length > 20) es.removeChild(es.lastChild);
+    }, CONFIG.SECURITY_REFRESH_MS);
+  },
+  
+  buildMetricsSupport() {
+    // Pipeline status
+    const pl = document.getElementById('pipelineList');
+    if (pl) {
+      const pipes = [
+        {n:'US Customs CBP Feed',s:'healthy',t:'2.1h ago'},
+        {n:'Global BL Data (190 cty)',s:'healthy',t:'1.8h ago'},
+        {n:'China COSCO Manifest',s:'healthy',t:'3.2h ago'},
+        {n:'Vietnam Port Authority',s:'warning',t:'6.4h ago'},
+        {n:'EU Trade Statistics',s:'healthy',t:'2.9h ago'},
+        {n:'India DGFT Feed',s:'healthy',t:'1.2h ago'},
+      ];
+      pl.innerHTML = pipes.map(p => `
+        <div class="pipeline-item">
+          <div class="pipeline-dot" style="background:${p.s==='healthy'?'var(--accent)':'var(--amber)'};"></div>
+          <div class="pipeline-name">${p.n}</div>
+          <div class="pipeline-time">${p.t}</div>
+          <span class="pipeline-status" style="background:${p.s==='healthy'?'rgba(0,229,180,.08)':'rgba(245,158,11,.1)'};color:${p.s==='healthy'?'var(--accent)':'var(--amber)'};">${p.s.toUpperCase()}</span>
+        </div>
+      `).join('');
+    }
+    // Geo users
+    const geo = document.getElementById('geoList');
+    if (geo) {
+      const data = [{c:'🇺🇸 United States',pct:34,n:'4,368'},{c:'🇬🇧 United Kingdom',pct:14,n:'1,799'},{c:'🇩🇪 Germany',pct:9,n:'1,156'},{c:'🇨🇳 China',pct:8,n:'1,028'},{c:'🇯🇵 Japan',pct:6,n:'771'},{c:'🇮🇳 India',pct:5,n:'642'},{c:'🇳🇱 Netherlands',pct:4,n:'514'},{c:'🇸🇬 Singapore',pct:3,n:'385'}];
+      geo.innerHTML = data.map(g => `
+        <div class="geo-item">
+          <div class="geo-country">${g.c}</div>
+          <div class="geo-bar-wrap"><div class="geo-bar-fill" style="width:${g.pct}%;"></div></div>
+          <div class="geo-count">${g.n}</div>
+        </div>
+      `).join('');
+    }
+  },
+  
+  buildCompanyTabs() {
+    // Company shipments
+    const tb = document.getElementById('coShipBody');
+    if (tb) {
+      DATA.getShipments().slice(0,12).forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="td-mono" style="font-size:11px;">${s.date}</td><td style="font-size:11px;color:var(--text-secondary);">${s.shipper}</td><td class="td-hs">${s.hs}</td><td style="font-size:10px;color:var(--text-muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.desc}</td><td style="font-size:11px;">${s.origin}</td><td class="td-right" style="color:var(--accent);font-weight:600;">${DATA.fmtN(s.value)}</td><td class="td-right" style="color:var(--text-secondary);">${DATA.fmtC(s.weight)}</td><td style="font-size:10px;color:var(--text-muted);">${s.port}</td>`;
+        tb.appendChild(tr);
+      });
+    }
+    // Supplier table
+    const sw = document.getElementById('supplierTableWrap');
+    if (sw) {
+      const data = [{n:'Foxconn Technology Co.',c:'🇨🇳 China',p:'Laptops, iPhones',sh:3420,v:'$84.2B',pct:32},{n:'Pegatron Corporation',c:'🇹🇼 Taiwan',p:'MacBook, iPad',sh:1890,v:'$46.1B',pct:18},{n:'Quanta Computer Inc.',c:'🇹🇼 Taiwan',p:'MacBook Pro',sh:1240,v:'$30.7B',pct:12},{n:'Luxshare Precision',c:'🇨🇳 China',p:'AirPods, Watch',sh:980,v:'$24.2B',pct:9},{n:'Wistron Corporation',c:'🇮🇳 India',p:'iPhone SE',sh:720,v:'$17.8B',pct:7}];
+      sw.innerHTML = `<table style="width:100%;border-collapse:collapse;"><thead><tr><th>Supplier</th><th>Country</th><th>Product</th><th style="text-align:right">Shipments</th><th style="text-align:right">Value</th><th>Share</th></tr></thead><tbody>${data.map(d => `<tr><td style="font-size:11.5px;font-weight:500;color:var(--accent);cursor:pointer;padding:10px 14px;border-bottom:1px solid var(--border-soft);">${d.n}</td><td style="font-size:11px;color:var(--text-secondary);padding:10px 14px;border-bottom:1px solid var(--border-soft);">${d.c}</td><td style="font-size:10px;color:var(--text-muted);padding:10px 14px;border-bottom:1px solid var(--border-soft);">${d.p}</td><td style="font-family:var(--font-mono);font-size:11px;text-align:right;color:var(--text-secondary);padding:10px 14px;border-bottom:1px solid var(--border-soft);">${DATA.fmtC(d.sh)}</td><td style="font-family:var(--font-mono);font-size:12px;font-weight:600;text-align:right;padding:10px 14px;border-bottom:1px solid var(--border-soft);">${d.v}</td><td style="padding:10px 14px;border-bottom:1px solid var(--border-soft);"><div style="display:flex;align-items:center;gap:7px;"><div style="width:70px;height:3px;background:var(--bg-overlay);border-radius:2px;"><div style="width:${d.pct}%;height:100%;background:var(--accent);border-radius:2px;"></div></div><span style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);">${d.pct}%</span></div></td></tr>`).join('')}</tbody></table>`;
+    }
+    // Trade routes
+    const tr = document.getElementById('tradeRoutesWrap');
+    if (tr) {
+      const routes = [{from:'🇨🇳 Shenzhen',to:'🇺🇸 Los Angeles',ships:4821,val:'$84B',carrier:'Evergreen/COSCO'},{from:'🇹🇼 Taipei',to:'🇺🇸 Long Beach',ships:1240,val:'$30B',carrier:'Yang Ming'},{from:'🇻🇳 Ho Chi Minh',to:'🇺🇸 Los Angeles',ships:980,val:'$18B',carrier:'MSC/CMA CGM'},{from:'🇮🇳 Mumbai',to:'🇺🇸 New York',ships:720,val:'$14B',carrier:'Maersk/APL'}];
+      tr.innerHTML = `<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:12px;">Top Trade Routes</div>${routes.map((r,i) => `<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);"><div style="width:22px;height:22px;border-radius:50%;background:var(--bg-elevated);border:1px solid var(--border-soft);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);">${i+1}</div><div style="flex:1;"><div style="font-size:11.5px;font-weight:500;">${r.from} → ${r.to}</div><div style="font-size:10px;color:var(--text-muted);">${r.carrier}</div></div><div style="text-align:right;"><div style="font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--accent);">${r.val}</div><div style="font-size:10px;color:var(--text-muted);">${DATA.fmtC(r.ships)} shipments</div></div></div>`).join('')}`;
+    }
+  },
+  
+  buildFeatureMatrix() {
+    const tb = document.getElementById('featureMatrixBody');
+    if (!tb) return;
+    const features = [
+      ['Shipment searches','500/mo','Unlimited','Unlimited','Unlimited'],
+      ['Data history','30 days','5 years','10 years','Custom'],
+      ['Countries covered','US only','190+','190+','190+ + custom'],
+      ['Company profiles','Basic','Full','Full','Full + custom'],
+      ['Export CSV/Excel','500 rows','Unlimited','Unlimited','Unlimited'],
+      ['AI Trade Leads','—','50/month','Unlimited','Unlimited'],
+      ['Competitor intelligence','—','✓','✓','✓'],
+      ['Seasonality analysis','—','✓','✓','✓'],
+      ['API access','—','1K calls/mo','50K calls/mo','Unlimited SLA'],
+      ['DataPulse agent','Read-only','Full','Full','Full + custom'],
+      ['TradeScout agent','—','✓','✓','✓'],
+      ['CyberGuard agent','—','—','✓','✓ + custom'],
+      ['CustomerAI agent','—','—','✓','✓'],
+      ['SiteKeeper agent','—','—','✓','✓'],
+      ['Mobile Command Center','—','—','✓','✓'],
+      ['Telegram/SMS alerts','—','—','✓','✓'],
+      ['Team seats','1','3','10','Unlimited'],
+      ['Support SLA','Community','Email 24h','Priority 4h','Dedicated 24/7'],
+      ['Uptime SLA','—','99.9%','99.95%','99.99%'],
+      ['White-label option','—','—','—','✓'],
+      ['SOC2 / GDPR','—','—','—','✓'],
+    ];
+    tb.innerHTML = features.map((row,i) => `<tr>${row.map((cell,j) => `<td style="${i%2===0?'background:rgba(255,255,255,.015)':''}">${j===0?cell:cell==='—'?`<span class="no">—</span>`:cell.includes('✓')||cell==='Unlimited'?`<span class="chk">${cell}</span>`:cell}</td>`).join('')}</tr>`).join('');
+  },
+  
+  updateConnectionStatus(connected) {
+    const banner = document.getElementById('connectionBanner');
+    const status = document.getElementById('apiStatus');
+    if (banner) banner.classList.toggle('show', !connected);
+    if (status) {
+      status.className = `api-status ${connected?'connected':'disconnected'}`;
+      status.innerHTML = `<div class="pulse ${connected?'green':'red'}" style="width:5px;height:5px;"></div>${connected?'Backend Connected':'Demo Mode'}`;
+    }
+  },
+};
+
+/* ── Need to expose DATA.getShipments correctly ── */
+const Data = { getShipments: () => DATA.getShipments() };
+
+/* ═══════════════════════════════════════════════════════════════
+   AGENT CHAT UI
+═══════════════════════════════════════════════════════════════ */
+const AGENTS_UI = {
+  initChat() {
+    this.openChat('cyberguard');
+  },
+  
+  openChat(agentId) {
+    currentAgent = AGENTS.definitions.find(a => a.id === agentId) || AGENTS.definitions[0];
+    chatHistory = [];
+    const msgs = document.getElementById('chatMessages');
+    if (msgs) msgs.innerHTML = '';
+    
+    // Update selector buttons
+    document.querySelectorAll('.agent-sel-btn').forEach(b => {
+      b.classList.remove('active');
+      b.style.background = '';
+      b.style.borderColor = '';
+      b.style.color = '';
+    });
+    const activeBtn = document.querySelector(`.agent-sel-btn[onclick*="'${agentId}'"]`);
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+      const rgb = activeBtn.dataset.rgb;
+      const color = activeBtn.dataset.color;
+      if (rgb) { activeBtn.style.background = `rgba(${rgb},.12)`; activeBtn.style.borderColor = `rgba(${rgb},.3)`; activeBtn.style.color = color; }
+    }
+    
+    const welcome = {
+      cyberguard: `Hello, I'm **CyberGuard**. Currently monitoring 2 active threats and have blocked 4,821 requests today. How can I help with your security?`,
+      customerai: `Hi there! I'm **CustomerAI**. I'm here to help your customers — currently handling 3 active support chats. What do you need?`,
+      datapulse: `I'm **DataPulse**. I've generated 34 reports today and flagged 7 anomalies. All 12 data pipeline feeds are healthy. What data do you need?`,
+      sitekeeper: `I'm **SiteKeeper**. All systems nominal — DB response 142ms, cache hit rate 94.2%, uptime 99.94%. What can I optimize?`,
+      tradescout: `I'm **TradeScout**. I've identified 247 trade leads across 42 markets today with scores ranging 71-94. What intelligence do you need?`,
+    };
+    this.addMessage('agent', welcome[agentId] || `I'm ${currentAgent.name}. How can I help?`);
+  },
+  
+  selectAgent(btn, agentId, rgb) {
+    this.openChat(agentId);
+  },
+  
+  addMessage(role, text) {
+    const msgs = document.getElementById('chatMessages');
+    if (!msgs) return;
+    const div = document.createElement('div');
+    div.className = `msg ${role === 'user' ? 'user' : 'agent-msg'}`;
+    const formatted = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    div.innerHTML = `<div class="msg-bubble">${formatted}</div><div class="msg-meta">${role==='user'?'You':'🤖 '+currentAgent.name} · ${new Date().toLocaleTimeString()}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  },
+  
+  showTyping() {
+    const msgs = document.getElementById('chatMessages');
+    if (!msgs) return;
+    const div = document.createElement('div');
+    div.className = 'msg agent-msg'; div.id = 'typingIndicator';
+    div.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  },
+  
+  removeTyping() { document.getElementById('typingIndicator')?.remove(); },
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════════════════════ */
+const CHARTS = {
+  // Chart.js default options for dark theme
+  defaults: {
+    tooltip: { backgroundColor:'#1a2230', borderColor:'rgba(255,255,255,0.08)', borderWidth:1, titleColor:'#dde4ed', bodyColor:'#7d8fa3' },
+    grid: 'rgba(255,255,255,0.04)',
+    ticks: '#3d5066',
+  },
+  
+  safe(id, fn) { const el = document.getElementById(id); if (el) fn(el); },
+  
+  buildAll() {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const C = this.defaults;
+    
+    // Timeline
+    this.safe('timelineChart', el => new Chart(el, {
+      type: 'line',
+      data: { labels: months, datasets: [
+        { label:'2024', data:[820,940,1100,980,1250,1380,1190,1420,1680,1540,1320,1190], borderColor:'#00e5b4', backgroundColor:'rgba(0,229,180,0.06)', fill:true, tension:.4, pointRadius:2, borderWidth:1.5 },
+        { label:'2023', data:[720,810,950,880,1100,1150,1020,1280,1480,1320,1150,1080], borderColor:'#0099ff', backgroundColor:'rgba(0,153,255,0.04)', fill:true, tension:.4, pointRadius:2, borderWidth:1, borderDash:[4,4] },
+      ]},
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:C.tooltip }, scales:{ x:{grid:{color:C.grid},ticks:{color:C.ticks,font:{size:10}}}, y:{grid:{color:C.grid},ticks:{color:C.ticks,font:{size:10}}} } },
+    }));
+    
+    // Country chart
+    this.safe('countryChart', el => new Chart(el, {
+      type: 'bar',
+      data: { labels:['China','Vietnam','India','Germany','S.Korea','Mexico','Taiwan'], datasets:[{ data:[62,12,8,6,5,4,3], backgroundColor:['#00e5b4','#0099ff','#f59e0b','#a78bfa','#ef4444','#2dd4bf','#ec4899'], borderRadius:3 }] },
+      options: { responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{display:false}, tooltip:{...C.tooltip, callbacks:{label:c=>` ${c.raw}% of imports`}} }, scales:{ x:{grid:{color:C.grid},ticks:{color:C.ticks,font:{size:10},callback:v=>v+'%'}}, y:{grid:{display:false},ticks:{color:C.ticks,font:{size:10}}} } },
+    }));
+    
+    // HS donut
+    this.safe('hsChart', el => new Chart(el, {
+      type: 'doughnut',
+      data: { labels:['Laptops 8471','Phones 8517','Apparel 6110','Vehicles 8703','Other'], datasets:[{ data:[38,24,15,12,11], backgroundColor:['#00e5b4','#0099ff','#f59e0b','#a78bfa','#3d5066'], borderWidth:0, hoverOffset:4 }] },
+      options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{display:false}, tooltip:C.tooltip } },
+    }));
+    
+    // Market share
+    this.safe('mktShareChart', el => new Chart(el, {
+      type: 'bar',
+      data: { labels:['Apple','Samsung','Lenovo','HP','Dell','Microsoft','Asus'], datasets:[
+        { label:'2024', data:[28,18,14,12,10,8,6], backgroundColor:'rgba(0,229,180,0.75)', borderRadius:3 },
+        { label:'2023', data:[25,19,15,11,10,9,6], backgroundColor:'rgba(0,229,180,0.2)', borderRadius:3 },
+      ]},
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:C.tooltip }, scales:{ x:{grid:{display:false},ticks:{color:C.ticks,font:{size:10}}}, y:{grid:{color:C.grid},ticks:{color:C.ticks,font:{size:10},callback:v=>v+'%'}} } },
+    }));
+    
+    // Diversification radar
+    this.safe('divChart', el => new Chart(el, {
+      type: 'radar',
+      data: { labels:['Supplier Count','Country Spread','HS Diversity','Port Spread','Carrier Mix','Lead Time'], datasets:[
+        { label:'Apple', data:[85,72,60,78,65,80], borderColor:'#00e5b4', backgroundColor:'rgba(0,229,180,0.08)', pointBackgroundColor:'#00e5b4', borderWidth:1.5 },
+        { label:'Samsung', data:[70,80,55,65,70,60], borderColor:'#0099ff', backgroundColor:'rgba(0,153,255,0.06)', pointBackgroundColor:'#0099ff', borderWidth:1.5 },
+      ]},
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:C.tooltip }, scales:{ r:{ grid:{color:'rgba(255,255,255,0.06)'}, pointLabels:{color:C.ticks,font:{size:9}}, ticks:{display:false}, angleLines:{color:'rgba(255,255,255,0.04)'} } } },
+    }));
+    
+    // Product chart
+    this.safe('productChart', el => new Chart(el, {
+      type: 'bar',
+      data: { labels:['8471.30','8517.12','8528.72','9013.80','8708.99'], datasets:[{ data:[92.4,68.3,24.1,18.7,12.2], backgroundColor:['#00e5b4','#0099ff','#f59e0b','#a78bfa','#ef4444'], borderRadius:4 }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{...C.tooltip, callbacks:{label:c=>`$${c.raw}B`}} }, scales:{ x:{grid:{display:false},ticks:{color:C.ticks,font:{size:10,family:'IBM Plex Mono'}}}, y:{grid:{color:C.grid},ticks:{color:C.ticks,font:{size:10},callback:v=>'$'+v+'B'}} } },
+    }));
+    
+    // Revenue chart
+    this.safe('revenueChart', el => new Chart(el, {
+      type: 'bar',
+      data: { labels: months, datasets:[
+        { label:'Enterprise', data:[12,14,15,14,16,18,17,19,22,24,26,28], backgroundColor:'rgba(0,229,180,0.75)', borderRadius:2 },
+        { label:'Business', data:[8,9,10,10,11,12,11,13,14,15,16,18], backgroundColor:'rgba(0,153,255,0.7)', borderRadius:2 },
+        { label:'Professional', data:[6,7,7,8,8,9,9,10,11,12,12,13], backgroundColor:'rgba(245,158,11,0.65)', borderRadius:2 },
+        { label:'Starter', data:[2,2,3,3,3,3,4,4,4,5,5,6], backgroundColor:'rgba(61,80,102,0.8)', borderRadius:2 },
+      ]},
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:C.tooltip }, scales:{ x:{grid:{display:false},ticks:{color:C.ticks,font:{size:10}},stacked:true}, y:{grid:{color:C.grid},ticks:{color:C.ticks,font:{size:10},callback:v=>'$'+v+'K'},stacked:true} } },
+    }));
+    
+    // Plan donut
+    this.safe('planChart', el => new Chart(el, {
+      type: 'doughnut',
+      data: { labels:['Enterprise','Business','Professional','Starter'], datasets:[{ data:[124,387,842,2140], backgroundColor:['#00e5b4','#0099ff','#f59e0b','#3d5066'], borderWidth:0, hoverOffset:4 }] },
+      options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{display:false}, tooltip:C.tooltip } },
+    }));
+    
+    // Performance chart
+    this.safe('perfChart', el => new Chart(el, {
+      type: 'line',
+      data: { labels:Array.from({length:24},(_,i)=>`${i}:00`), datasets:[{ data:Array.from({length:24},()=>DATA.r(80,240)), borderColor:'#00e5b4', backgroundColor:'rgba(0,229,180,0.05)', fill:true, tension:.4, pointRadius:0, borderWidth:1.5 }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:C.tooltip }, scales:{ x:{grid:{color:C.grid},ticks:{color:C.ticks,font:{size:9},maxTicksLimit:8}}, y:{grid:{color:C.grid},ticks:{color:C.ticks,font:{size:10},callback:v=>v+'ms'}} } },
+    }));
+    
+    // Heatmap
+    const hm = document.getElementById('heatmapGrid');
+    if (hm) {
+      const intensities = [.1,.15,.2,.15,.25,.3,.45,.55,.7,.9,1,.85,.6,.4,.3,.25,.2,.3,.45,.6,.8,.95,1,.9,.7,.5,.35,.3,.4,.55,.65,.7,.75,.8,.9,1,.95,.85,.7,.55,.4,.3,.25,.2,.15,.2,.3,.45,.6,.75,.9,1];
+      hm.innerHTML = intensities.map(v => `<div class="heatmap-cell" style="background:rgba(0,229,180,${v});" title="Vol: ${Math.round(v*1000)}"></div>`).join('');
+    }
+    
+    // Seasonality bars
+    const sb = document.getElementById('seasonalityBars');
+    if (sb) {
+      const months2 = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+      const vals = [65,70,78,82,75,68,72,88,95,92,85,78];
+      const max = Math.max(...vals);
+      sb.innerHTML = months2.map((m,i) => {
+        const pct = vals[i]/max*100;
+        return `<div class="month-col"><div class="month-bar-wrap"><div class="month-bar" style="height:${pct}%;background:rgba(0,229,180,${0.3+pct/100*0.7});"></div></div><div class="month-label">${m}</div><div class="month-value">${vals[i]}</div></div>`;
+      }).join('');
+    }
+  },
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION & INTERACTIONS
+═══════════════════════════════════════════════════════════════ */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tnav-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(t => t.classList.remove('active'));
+  
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  
+  // Update nav items
+  const navMap = { search:'shipments', analytics:'analytics', companies:'companies', leads:'trade leads', competitor:'intel', agents:'ai agents', security:'security', metrics:'metrics', mobile:'mobile', alerts:'alerts', pricing:'pricing' };
+  document.querySelectorAll('.tnav-item').forEach(t => { if (t.textContent.toLowerCase().includes(navMap[id]||id)) t.classList.add('active'); });
+  document.querySelectorAll('.sb-item').forEach(t => {
+    const txt = t.textContent.toLowerCase();
+    if ((id==='search'&&txt.includes('shipment'))||(id==='analytics'&&txt.includes('analytic'))||(id==='companies'&&txt.includes('compan'))||(id==='leads'&&txt.includes('lead'))||(id==='competitor'&&txt.includes('competitor'))||(id==='agents'&&txt.includes('agent'))||(id==='security'&&txt.includes('cyber'))||(id==='metrics'&&txt.includes('data'))||(id==='mobile'&&txt.includes('mobile'))||(id==='alerts'&&txt.includes('alert'))||(id==='pricing'&&txt.includes('subscript'))) t.classList.add('active');
+  });
+}
+
+function showTab(btn, tabId) {
+  btn.closest('.tab-row').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId)?.classList.add('active');
+}
+
+function closeDrawer() { document.getElementById('detailOverlay').classList.remove('open'); }
+function handleOverlayClick(e) { if (e.target === document.getElementById('detailOverlay')) closeDrawer(); }
+
+function runSearch() {
+  const val = document.getElementById('shipmentTableBody');
+  if (val) UI.buildShipmentTable();
+}
+
+function toggleBilling() {
+  const t = document.getElementById('billingToggle');
+  if (t) t.classList.toggle('on');
+}
+
+async function sendMessage() {
+  const inp = document.getElementById('chatInput');
+  if (!inp || !inp.value.trim()) return;
+  const msg = inp.value.trim();
+  inp.value = '';
+  
+  AGENTS_UI.addMessage('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+  AGENTS_UI.showTyping();
+  
+  const reply = await API.chatWithAgent(currentAgent.id, msg, chatHistory);
+  AGENTS_UI.removeTyping();
+  chatHistory.push({ role: 'assistant', content: reply });
+  AGENTS_UI.addMessage('agent', reply);
+}
+
+function clearChat() {
+  chatHistory = [];
+  const msgs = document.getElementById('chatMessages');
+  if (msgs) msgs.innerHTML = '';
+}
+
+function askAgent(agentId, prompt) {
+  showPage('agents');
+  AGENTS_UI.openChat(agentId);
+  setTimeout(() => {
+    const inp = document.getElementById('chatInput');
+    if (inp) { inp.value = prompt; sendMessage(); }
+  }, 200);
+}
+</script>
+</body>
+</html>

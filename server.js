@@ -22,14 +22,10 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // ── ROUTES ──
+app.use(express.static(__dirname));
+
 app.get('/', (req, res) => {
-  res.json({
-    status: 'online',
-    platform: 'TradeIntel OS',
-    version: '1.0.0',
-    agents: ['CyberGuard','CustomerAI','DataPulse','SiteKeeper','TradeScout'],
-    message: 'All systems operational'
-  });
+  res.sendFile(__dirname + '/index.html');
 });
 
 // ── AGENT ROUTE ──
