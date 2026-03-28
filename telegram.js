@@ -1,12 +1,11 @@
 const { Telegraf } = require('telegraf');
 
-const ADMIN_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 let bot = null;
 
 const sendAlert = async (message) => {
   try {
-    if (!bot || !ADMIN_CHAT_ID) return;
-    await bot.telegram.sendMessage(ADMIN_CHAT_ID, message);
+    if (!bot || !process.env.TELEGRAM_CHAT_ID) return;
+    await bot.telegram.sendMessage(process.env.TELEGRAM_CHAT_ID, message);
   } catch (err) {
     console.error('Telegram alert error:', err.message);
   }
@@ -15,23 +14,18 @@ const sendAlert = async (message) => {
 const startBot = () => {
   try {
     if (!process.env.TELEGRAM_BOT_TOKEN) {
-      console.log('⚠ Telegram: No token — bot disabled');
+      console.log('Telegram: No token, bot disabled');
       return;
     }
     bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
-
-    bot.command('start', ctx => ctx.reply('🚀 TradeIntel Admin Bot Online!\nType /help for commands'));
-    bot.command('status', ctx => ctx.reply('✅ All systems operational'));
-    bot.command('agents', ctx => ctx.reply('🤖 All 5 agents online'));
-    bot.command('security', ctx => ctx.reply('🛡 No critical threats'));
-    bot.command('metrics', ctx => ctx.reply('📊 Platform running normally'));
+    bot.command('start', ctx => ctx.reply('TradeIntel Admin Bot Online! Type /help'));
+    bot.command('status', ctx => ctx.reply('All systems operational'));
+    bot.command('agents', ctx => ctx.reply('All 5 agents online'));
+    bot.command('security', ctx => ctx.reply('No critical threats'));
+    bot.command('metrics', ctx => ctx.reply('Platform running normally'));
     bot.command('help', ctx => ctx.reply('/status /agents /security /metrics'));
-
-    bot.launch().catch(err => {
-      console.error('Telegram launch error:', err.message);
-    });
-
-    console.log('✅ Telegram bot starting...');
+    bot.launch().catch(err => console.error('Bot error:', err.message));
+    console.log('Telegram bot starting...');
   } catch (err) {
     console.error('Telegram setup error:', err.message);
   }
