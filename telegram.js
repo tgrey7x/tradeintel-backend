@@ -32,4 +32,3 @@ const startBot = () => {
 };
 
 module.exports = { sendAlert, startBot };
-```
