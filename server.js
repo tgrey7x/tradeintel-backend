@@ -1,4 +1,5 @@
 const express = require('express');
+const { startBot, sendAlert } = require('./telegram');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -94,5 +95,5 @@ app.listen(PORT, () => {
   ╚═══════════════════════════════════╝
   `);
 });
-
+startBot();
 module.exports = app;
