@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@supabase/supabase-js": "^2.100.1",
     "anthropic": "^0.0.0",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
