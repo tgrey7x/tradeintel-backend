@@ -1,5 +1,6 @@
 const express = require('express');
 const { startBot, sendAlert } = require('./telegram');
+const authRoutes = require('./auth');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -8,6 +9,7 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 
 // ── SECURITY MIDDLEWARE ──
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
@@ -18,12 +20,14 @@ app.use(express.urlencoded({ extended: true }));
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests, please try again later.'
+  message: 'Too many requests, please try again later.',
+  validate: { xForwardedForHeader: false }
 });
 app.use(limiter);
 
 // ── ROUTES ──
 app.use(express.static(__dirname));
+app.use('/auth', authRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
