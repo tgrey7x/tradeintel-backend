@@ -28,7 +28,7 @@ app.use(limiter);
 // ── ROUTES ──
 app.use('/auth', authRoutes);
 app.get('/test', (req, res) => res.json({ success: true, message: 'Routes working!' }));
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, { index: false }));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
