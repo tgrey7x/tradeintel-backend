@@ -26,8 +26,8 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // ── ROUTES ──
-app.use(express.static(__dirname));
 app.use('/auth', authRoutes);
+app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
