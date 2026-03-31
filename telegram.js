@@ -19,7 +19,7 @@ const startBot = () => {
     }
     bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
-    bot.command('start', ctx => ctx.reply('🚀 TradeIntel Admin Bot Online!\nType /help for all commands'));
+    bot.command('start', ctx => ctx.reply('🚀 IXIntel Admin Bot Online!\nType /help for all commands'));
 
     bot.command('status', ctx => ctx.reply('✅ TradeIntel OS Status\n\n🟢 Backend: Online\n🟢 AI Agents: 5/5 Active\n🟢 SSL: Valid\n🟢 Uptime: 99.94%\n🟢 Firewall: Active\n\n⏱ ' + new Date().toLocaleString()));
 

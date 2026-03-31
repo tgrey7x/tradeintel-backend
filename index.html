@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="description" content="TradeIntel OS — AI-Powered Global Trade Intelligence Platform">
+<meta name="description" content="IXIntel OS — AI-Powered Global Trade Intelligence Platform">
 <meta name="theme-color" content="#07090d">
-<title>TradeIntel OS — Global Trade Intelligence</title>
+<title>IXIntel OS — Global Trade Intelligence</title>
 <link rel="manifest" href="#"> <!-- PWA manifest goes here -->
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   TRADEINTEL OS — MASTER STYLESHEET
+   IXIntel OS — MASTER STYLESHEET
    
    HOW TO MODIFY:
    - Colors/theme → Edit :root variables below
@@ -1127,7 +1127,7 @@ tr:hover td { background: rgba(255,255,255,0.015); }
   <header class="topbar">
     <div class="topbar-logo">
       <div class="logo-mark">◈</div>
-      TradeIntel OS
+      IXIntel OS
     </div>
     <nav class="topbar-nav">
       <button class="tnav-item active" onclick="showPage('search')">Shipments</button>
@@ -1544,7 +1544,7 @@ tr:hover td { background: rgba(255,255,255,0.015); }
       <!-- ═══════════════ AI AGENTS PAGE ═══════════════ -->
       <div class="page" id="page-agents">
         <div class="page-hero" style="background:linear-gradient(135deg,var(--bg-surface) 0%,rgba(0,229,180,0.03) 100%);">
-          <div class="hero-eyebrow">TradeIntel AI Agent Suite</div>
+          <div class="hero-eyebrow">IXIntel AI Agent Suite</div>
           <div class="hero-title">5 Specialized AI Agents — Live</div>
           <div class="hero-subtitle">Purpose-built agents powered by Claude · Mixed Sonnet 4.6 / Opus 4.6 model strategy · Monitor, respond, analyze, and defend</div>
         </div>
@@ -1688,7 +1688,7 @@ tr:hover td { background: rgba(255,255,255,0.015); }
               <div class="phone-notch"><div class="phone-notch-bar"></div></div>
               <div class="phone-screen">
                 <div class="phone-header">
-                  <div class="phone-logo">◈ TradeIntel</div>
+                  <div class="phone-logo">◈ IXIntel</div>
                   <div style="margin-left:auto;display:flex;gap:4px;align-items:center;"><div class="pulse green" style="width:5px;height:5px;"></div><span style="font-size:8px;color:var(--text-muted);">LIVE</span></div>
                 </div>
                 <div class="phone-body">
@@ -1795,7 +1795,7 @@ tr:hover td { background: rgba(255,255,255,0.015); }
       <div class="page" id="page-pricing">
         <div class="page-hero">
           <div class="hero-eyebrow">Multi-Tier Subscription Platform</div>
-          <div class="hero-title">TradeIntel OS Pricing</div>
+          <div class="hero-title">IXIntel OS Pricing</div>
           <div class="hero-subtitle">From solo traders to global enterprises · All plans include AI agents · Annual billing saves 20%</div>
         </div>
         <div class="billing-toggle">
@@ -1926,7 +1926,7 @@ tr:hover td { background: rgba(255,255,255,0.015); }
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   TRADEINTEL OS — MASTER JAVASCRIPT
+   IXIntel OS — MASTER JAVASCRIPT
    
    CONFIGURATION: Edit CONFIG object below to customize behavior
    API: All backend calls go through API object — easy to modify
@@ -1939,7 +1939,7 @@ tr:hover td { background: rgba(255,255,255,0.015); }
 /* ── CONFIGURATION (edit this to customize) ── */
 const CONFIG = {
   // Backend URL — update this to your Railway URL
-  BACKEND_URL: 'https://tradeintel-backend-production.up.railway.app',
+  BACKEND_URL: 'https://IXIntel-backend-production.up.railway.app',
   
   // AI Models per agent (mixed strategy for cost/quality balance)
   AGENT_MODELS: {
@@ -2056,7 +2056,7 @@ const AGENTS = {
       stats: [{l:'Blocked today',v:'4,821'},{l:'Block rate',v:'98.7%'},{l:'Response',v:'<50ms'}],
       log: '[14:22] Brute force 103.21.244.x → blocked\n[14:18] SQL injection → WAF blocked\n[14:11] SSL certs verified → A+',
       model: 'claude-sonnet-4-20250514',
-      systemPrompt: 'You are CyberGuard, a cybersecurity AI agent for TradeIntel global trade platform. You monitor threats, block attacks, analyze vulnerabilities, detect intrusions, and provide security recommendations. Be concise, technical, and prioritize user safety. Format responses clearly with severity levels when reporting threats.',
+      systemPrompt: 'You are CyberGuard, a cybersecurity AI agent for IXIntel global trade platform. You monitor threats, block attacks, analyze vulnerabilities, detect intrusions, and provide security recommendations. Be concise, technical, and prioritize user safety. Format responses clearly with severity levels when reporting threats.',
     },
     {
       id: 'customerai',
@@ -2070,7 +2070,7 @@ const AGENTS = {
       stats: [{l:'Resolved today',v:'142'},{l:'CSAT score',v:'4.8/5'},{l:'Avg response',v:'<2s'}],
       log: '[14:20] User #4821 onboarding done\n[14:15] Billing question resolved\n[14:09] API integration support sent',
       model: 'claude-sonnet-4-20250514',
-      systemPrompt: 'You are CustomerAI, a helpful customer support agent for TradeIntel, a global trade intelligence platform. Help users with account issues, data questions, billing, onboarding, and platform features. Be friendly, professional, and accurate. Always try to resolve issues in a single response.',
+      systemPrompt: 'You are CustomerAI, a helpful customer support agent for IXIntel, a global trade intelligence platform. Help users with account issues, data questions, billing, onboarding, and platform features. Be friendly, professional, and accurate. Always try to resolve issues in a single response.',
     },
     {
       id: 'datapulse',
@@ -2084,7 +2084,7 @@ const AGENTS = {
       stats: [{l:'Reports today',v:'34'},{l:'Anomalies',v:'7 flagged'},{l:'Pipeline',v:'12/12 OK'}],
       log: '[14:21] Weekly trade volume report done\n[14:17] Anomaly: VN→US electronics +34%\n[14:05] All 12 data feeds healthy',
       model: 'claude-opus-4-20250514',
-      systemPrompt: 'You are DataPulse, a data analytics AI agent for TradeIntel. You analyze trade data, generate reports, identify anomalies, track KPIs, monitor data pipeline health, and provide data-driven insights. Always include specific numbers and trends. Use structured formats for reports.',
+      systemPrompt: 'You are DataPulse, a data analytics AI agent for IXIntel. You analyze trade data, generate reports, identify anomalies, track KPIs, monitor data pipeline health, and provide data-driven insights. Always include specific numbers and trends. Use structured formats for reports.',
     },
     {
       id: 'sitekeeper',
@@ -2098,7 +2098,7 @@ const AGENTS = {
       stats: [{l:'Issues fixed',v:'12'},{l:'Cache hits',v:'94.2%'},{l:'DB response',v:'142ms'}],
       log: '[14:19] CDN cache cleared → +12% perf\n[14:14] Slow query optimized\n[14:08] SSL cert renewed (90 days)',
       model: 'claude-sonnet-4-20250514',
-      systemPrompt: 'You are SiteKeeper, a website maintenance AI agent for TradeIntel. You monitor infrastructure, optimize performance, manage deployments, clear caches, diagnose issues, and ensure platform stability. Be technical, proactive, and provide specific actionable recommendations.',
+      systemPrompt: 'You are SiteKeeper, a website maintenance AI agent for IXIntel. You monitor infrastructure, optimize performance, manage deployments, clear caches, diagnose issues, and ensure platform stability. Be technical, proactive, and provide specific actionable recommendations.',
     },
     {
       id: 'tradescout',
@@ -2112,14 +2112,14 @@ const AGENTS = {
       stats: [{l:'Leads found',v:'247'},{l:'Avg score',v:'78/100'},{l:'Markets',v:'42 scanned'}],
       log: '[14:20] 8 new VN furniture exporters found\n[14:16] Lead #247: MX auto parts score 94\n[14:10] Seasonal alert: Apparel peak soon',
       model: 'claude-opus-4-20250514',
-      systemPrompt: 'You are TradeScout, a trade intelligence AI agent for TradeIntel. You identify trade leads, analyze market opportunities, track competitor movements, detect seasonal trends, and find supplier-buyer matches using shipment data. Provide specific, actionable intelligence with HS codes, country data, and market sizing.',
+      systemPrompt: 'You are TradeScout, a trade intelligence AI agent for IXIntel. You identify trade leads, analyze market opportunities, track competitor movements, detect seasonal trends, and find supplier-buyer matches using shipment data. Provide specific, actionable intelligence with HS codes, country data, and market sizing.',
     },
   ],
   
   demoResponse(agentId, message) {
     const responses = {
       cyberguard: `🛡 **CyberGuard Security Report**\n\nCurrent threat level: ELEVATED\n\n• 2 active investigations: brute force from 103.21.x (187 attempts) and SQL injection attempts\n• 4,821 requests blocked in the past 24 hours\n• All SSL certificates valid — TLS 1.3 on all endpoints\n• WAF rules operational\n\nRegarding your query: "${message}" — I'm analyzing this now. In demo mode; connect backend for live AI responses.`,
-      customerai: `Hi there! I'm CustomerAI, your TradeIntel support agent.\n\nI'd be happy to help you with: "${message}"\n\nFor immediate assistance:\n• Account issues → Settings > Account\n• Billing → Settings > Billing  \n• Data questions → our documentation\n\nCurrently running in demo mode. Connect your backend API for live AI responses!`,
+      customerai: `Hi there! I'm CustomerAI, your IXIntel support agent.\n\nI'd be happy to help you with: "${message}"\n\nFor immediate assistance:\n• Account issues → Settings > Account\n• Billing → Settings > Billing  \n• Data questions → our documentation\n\nCurrently running in demo mode. Connect your backend API for live AI responses!`,
       datapulse: `📊 **DataPulse Analytics Summary**\n\nRegarding: "${message}"\n\nKey metrics snapshot:\n• Platform uptime: 99.94%\n• Active users: 12,847 (↑18.4%)\n• MRR: $284K (↑12.1%)\n• API calls today: 4.2M\n• Data freshness: 2.4 hours\n\nAll 12 data pipeline feeds are healthy. Running in demo mode — connect backend for live analysis.`,
       sitekeeper: `⚙ **SiteKeeper Infrastructure Report**\n\nAll systems operational.\n\nRegarding: "${message}"\n\n• Server response: 142ms (P95)\n• Cache hit rate: 94.2%\n• Database queries: optimized\n• CDN: active on all regions\n• Memory usage: 68% (normal)\n\nNo issues detected. Running in demo mode — connect backend for live monitoring.`,
       tradescout: `🔍 **TradeScout Intelligence Brief**\n\nRegarding: "${message}"\n\nTop opportunities identified today:\n1. Vietnamese furniture exporters (247 active, $2.4B opportunity)\n2. Mexican auto parts nearshoring (521 shippers, 34% growth)\n3. Indian pharma EU expansion (342 exporters, USFDA approved)\n\nLead scores range 71-94. Running in demo mode — connect backend for live AI intelligence.`,
@@ -2427,7 +2427,7 @@ const UI = {
         {t:'14:22:08',sev:'CRITICAL',sc:'sev-critical',dc:'r',msg:'Brute force attack — IP 103.21.244.187 — 187 attempts in 2min — Auto-blocked'},
         {t:'14:20:41',sev:'WARN',sc:'sev-warning',dc:'a',msg:'SQL injection attempt in search parameter — WAF rule #4821 triggered'},
         {t:'14:18:33',sev:'WARN',sc:'sev-warning',dc:'a',msg:'42 bot crawlers detected — Rate limiting applied — 6 IPs flagged'},
-        {t:'14:15:12',sev:'INFO',sc:'sev-info',dc:'b',msg:'SSL certificate verified — tradeintel.com — Valid 89 days — Grade A+'},
+        {t:'14:15:12',sev:'INFO',sc:'sev-info',dc:'b',msg:'SSL certificate verified — IXIntel.com — Valid 89 days — Grade A+'},
         {t:'14:12:05',sev:'OK',sc:'sev-ok',dc:'g',msg:'DDoS mitigation layer active — Cloudflare: all regions nominal'},
         {t:'14:09:44',sev:'INFO',sc:'sev-info',dc:'b',msg:'Failed login x12 — account temporarily locked — admin notified'},
         {t:'14:07:22',sev:'OK',sc:'sev-ok',dc:'g',msg:'Security headers verified — CSP, HSTS, X-Frame-Options all present'},

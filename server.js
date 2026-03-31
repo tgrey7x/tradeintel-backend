@@ -91,9 +91,9 @@ app.get('/health', (req, res) => {
 // ── START SERVER ──
 const PORT = 8080;
 app.listen(PORT, () => {
-  console.log(`
+console.log(`
   ╔═══════════════════════════════════╗
-  ║   TradeIntel OS Backend           ║
+  ║   IXIntel OS Backend              ║
   ║   Server running on port ${PORT}     ║
   ║   All 5 AI Agents Ready           ║
   ║   Status: OPERATIONAL             ║
