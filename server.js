@@ -93,8 +93,8 @@ const PORT = 8080;
 app.listen(PORT, () => {
 console.log(`
   ╔═══════════════════════════════════╗
-  ║   IXIntel OS Backend              ║
-  ║   Server running on port ${PORT}     ║
+  ║   IXIntel OS Backend v2           ║
+  ║   Server running on port ${PORT}  ║
   ║   All 5 AI Agents Ready           ║
   ║   Status: OPERATIONAL             ║
   ╚═══════════════════════════════════╝
