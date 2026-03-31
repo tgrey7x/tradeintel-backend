@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IXIntel OS — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   IXI AUTH PAGE — LOGIN & REGISTER
+   
+   HOW TO MODIFY:
+   - Colors → edit :root variables
+   - Backend URL → edit CONFIG.BACKEND_URL
+   - Add OAuth providers → add buttons in html
+   - Change logo/tagline → edit .brand section
+═══════════════════════════════════════════════════════ */
+
+:root {
+  --bg-base:     #07090d;
+  --bg-surface:  #0d1117;
+  --bg-elevated: #131920;
+  --bg-overlay:  #1a2230;
+  --border-soft: rgba(255,255,255,0.06);
+  --border-mid:  rgba(255,255,255,0.12);
+  --text-primary:   #dde4ed;
+  --text-secondary: #7d8fa3;
+  --text-muted:     #3d5066;
+  --accent:   #00e5b4;
+  --accent-h: #00c49a;
+  --red:      #ef4444;
+  --blue:     #0099ff;
+  --amber:    #f59e0b;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── ANIMATED BACKGROUND ── */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,180,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,180,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,229,180,0.06) 0%, transparent 70%);
+  top: -200px;
+  right: -100px;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-glow-2 {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,153,255,0.04) 0%, transparent 70%);
+  bottom: -100px;
+  left: -100px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── TICKER ── */
+.ticker {
+  height: 28px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-soft);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+.ticker-track {
+  display: flex;
+  animation: ticker 50s linear infinite;
+  white-space: nowrap;
+}
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  border-right: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.ticker-label { color: var(--text-muted); }
+.ticker-val { color: var(--text-primary); }
+.ticker-up { color: var(--accent); }
+.ticker-dn { color: var(--red); }
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ── MAIN LAYOUT ── */
+.auth-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 480px 1fr;
+  align-items: center;
+  min-height: calc(100vh - 28px);
+  position: relative;
+  z-index: 1;
+  padding: 40px 20px;
+}
+
+/* ── LEFT PANEL ── */
+.left-panel {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.brand-mark {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 48px;
+  text-decoration: none;
+}
+.brand-icon {
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid var(--accent);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+.hero-title span { color: var(--accent); }
+.hero-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 40px;
+  max-width: 380px;
+}
+.stats-row {
+  display: flex;
+  gap: 32px;
+}
+.stat-item { }
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.features-list {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.feature-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── AUTH CARD ── */
+.auth-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+}
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border-soft);
+}
+.auth-tab {
+  padding: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-sans);
+}
+.auth-tab:hover { color: var(--text-secondary); }
+.auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(0,229,180,0.02); }
+
+.auth-body { padding: 28px; }
+
+/* ── FORM ELEMENTS ── */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 11px 14px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: all 0.15s ease;
+}
+.form-input:focus { border-color: var(--accent); background: var(--bg-overlay); }
+.form-input::placeholder { color: var(--text-muted); }
+.form-input.error { border-color: var(--red); }
+.form-input.success { border-color: var(--accent); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+  letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary:hover { background: var(--accent-h); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,229,180,0.25); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.btn-google {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.btn-google:hover { border-color: rgba(255,255,255,0.2); color: var(--text-primary); background: var(--bg-elevated); }
+
+/* ── DIVIDER ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-soft);
+}
+
+/* ── ALERTS ── */
+.alert {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 16px;
+  display: none;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.5;
+}
+.alert.show { display: flex; }
+.alert-error { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+.alert-success { background: rgba(0,229,180,0.08); border: 1px solid rgba(0,229,180,0.2); color: var(--accent); }
+.alert-info { background: rgba(0,153,255,0.08); border: 1px solid rgba(0,153,255,0.2); color: #93c5fd; }
+
+/* ── LINKS ── */
+.form-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.form-link {
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+.form-link:hover { text-decoration: underline; }
+.forgot-link {
+  display: block;
+  text-align: right;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-top: -10px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.forgot-link:hover { color: var(--accent); }
+
+/* ── PASSWORD STRENGTH ── */
+.pw-strength { margin-top: 6px; display: none; }
+.pw-strength.show { display: block; }
+.pw-bars { display: flex; gap: 3px; margin-bottom: 4px; }
+.pw-bar { flex: 1; height: 2px; border-radius: 2px; background: var(--bg-overlay); transition: background 0.3s; }
+.pw-label { font-size: 9px; color: var(--text-muted); }
+
+/* ── PLAN SELECTOR ── */
+.plan-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+.plan-option {
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+.plan-option:hover { border-color: var(--border-mid); }
+.plan-option.selected { border-color: var(--accent); background: rgba(0,229,180,0.05); }
+.plan-option input { position: absolute; opacity: 0; }
+.plan-name { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+.plan-price { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
+.plan-desc { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── LOADING SPINNER ── */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TERMS ── */
+.terms-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.terms-check input { margin-top: 2px; accent-color: var(--accent); }
+
+/* ── SUCCESS STATE ── */
+.success-state {
+  text-align: center;
+  padding: 20px 0;
+  display: none;
+}
+.success-state.show { display: block; }
+.success-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(0,229,180,0.1);
+  border: 1px solid rgba(0,229,180,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 24px;
+}
+.success-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+.success-sub { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ── RIGHT PANEL ── */
+.right-panel {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+.security-badges { display: flex; flex-direction: column; gap: 10px; }
+.security-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.security-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+/* ── FOOTER ── */
+.auth-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-soft);
+  background: var(--bg-surface);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 10;
+}
+.footer-brand { font-family: var(--font-mono); color: var(--accent); }
+.footer-links { display: flex; gap: 16px; }
+.footer-links a { color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--text-secondary); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .auth-layout { grid-template-columns: 1fr; justify-items: center; padding: 20px; }
+  .left-panel, .right-panel { display: none; }
+  .auth-card { width: 100%; max-width: 440px; }
+}
+
+/* ── ANIMATIONS ── */
+.auth-card { animation: slideUp 0.4s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-glow-2"></div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="auth-layout">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <a href="/" class="brand-mark">
+      <div class="brand-icon">◈</div>
+      IXIntel OS
+    </a>
+    <div class="hero-eyebrow">Global Trade Intelligence Platform</div>
+    <div class="hero-title">The Intelligence<br>Layer for<br><span>Global Trade</span></div>
+    <div class="hero-subtitle">From solo brokers to Fortune 500 enterprises — AI-powered shipment intelligence, supplier discovery, and market analytics in one platform.</div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-value">847M+</div><div class="stat-label">Shipments</div></div>
+      <div class="stat-item"><div class="stat-value">190+</div><div class="stat-label">Countries</div></div>
+      <div class="stat-item"><div class="stat-value">5 AI</div><div class="stat-label">Agents</div></div>
+    </div>
+    <div class="features-list">
+      <div class="feature-item"><div class="feature-dot"></div>Real-time shipment tracking and bill of lading search</div>
+      <div class="feature-item"><div class="feature-dot"></div>AI-powered trade leads and supplier discovery</div>
+      <div class="feature-item"><div class="feature-dot"></div>Competitor intelligence and market share analysis</div>
+      <div class="feature-item"><div class="feature-dot"></div>CyberGuard security monitoring 24/7</div>
+      <div class="feature-item"><div class="feature-dot"></div>Mobile command center via Telegram</div>
+    </div>
+  </div>
+
+  <!-- AUTH CARD -->
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="showTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="showTab('register')">Create Account</button>
+    </div>
+    <div class="auth-body">
+
+      <!-- LOGIN FORM -->
+      <div id="loginForm">
+        <div class="alert alert-error" id="loginError"></div>
+        <div class="alert alert-success" id="loginSuccess"></div>
+
+        <button class="btn-google" onclick="handleGoogleLogin()">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+
+        <div class="divider">or sign in with email</div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@company.com" onkeydown="if(event.key==='Enter')handleLogin()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()">
+          <a class="forgot-link" onclick="showForgot()">Forgot password?</a>
+        </div>
+
+        <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Sign In to IXIntel</button>
+
+        <div class="form-footer">
+          Don't have an account? <span class="form-link" onclick="showTab('register')">Create one free</span>
+        </div>
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+      <div id="forgotForm" style="display:none;">
+        <div class="alert alert-info show" style="margin-bottom:16px;">
+          Enter your email and we'll send you a reset link.
+        </div>
+        <div class="alert alert-success" id="forgotSuccess"></div>
+        <div class="alert alert-error" id="forgotError"></div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="forgotEmail" placeholder="you@company.com">
+        </div>
+        <button class="btn-primary" id="forgotBtn" onclick="handleForgot()">Send Reset Link</button>
+        <div class="form-footer" style="margin-top:14px;">
+          <span class="form-link" onclick="showLogin()">← Back to sign in</span>
+        </div>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="registerForm" style="display:none;">
+        <div class="alert alert-error" id="registerError"></div>
+
+        <div class="success-state" id="registerSuccess">
+          <div class="success-icon">✓</div>
+          <div class="success-title">Account Created!</div>
+          <div class="success-sub">Check your email to verify your account.<br>Then sign in to access IXIntel OS.</div>
+          <button class="btn-primary" style="margin-top:20px;" onclick="showTab('login')">Go to Sign In</button>
+        </div>
+
+        <div id="registerFields">
+          <button class="btn-google" onclick="handleGoogleLogin()">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Continue with Google
+          </button>
+          <div class="divider">or register with email</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-input" id="regFirst" placeholder="Tony">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-input" id="regLast" placeholder="G">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Work Email</label>
+            <input type="email" class="form-input" id="regEmail" placeholder="you@company.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="regPassword" placeholder="Min. 8 characters" oninput="checkPasswordStrength(this.value)">
+            <div class="pw-strength" id="pwStrength">
+              <div class="pw-bars">
+                <div class="pw-bar" id="pwBar1"></div>
+                <div class="pw-bar" id="pwBar2"></div>
+                <div class="pw-bar" id="pwBar3"></div>
+                <div class="pw-bar" id="pwBar4"></div>
+              </div>
+              <div class="pw-label" id="pwLabel">Enter a password</div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Select Plan</label>
+            <div class="plan-selector">
+              <label class="plan-option selected" onclick="selectPlan(this,'starter')">
+                <input type="radio" name="plan" value="starter" checked>
+                <div class="plan-name">Starter</div>
+                <div class="plan-price">$49/mo</div>
+                <div class="plan-desc">500 searches</div>
+              </label>
+              <label class="plan-option" onclick="selectPlan(this,'professional')">
+                <input type="radio" name="plan" value="professional">
+                <div class="plan-name">Professional</div>
+                <div class="plan-price">$199/mo</div>
+                <div class="plan-desc">Unlimited</div>
+              </label>
+              <label class="plan-option" onclick="selectPlan(this,'business')">
+                <input type="radio" name="plan" value="business">
+                <div class="plan-name">Business</div>
+                <div class="plan-price">$599/mo</div>
+                <div class="plan-desc">All agents</div>
+              </label>
+              <label class="plan-option" onclick="selectPlan(this,'enterprise')">
+                <input type="radio" name="plan" value="enterprise">
+                <div class="plan-name">Enterprise</div>
+                <div class="plan-price">Custom</div>
+                <div class="plan-desc">White label</div>
+              </label>
+            </div>
+          </div>
+
+          <div class="terms-check">
+            <input type="checkbox" id="termsCheck">
+            <label for="termsCheck">I agree to the <a href="#" class="form-link">Terms of Service</a> and <a href="#" class="form-link">Privacy Policy</a></label>
+          </div>
+
+          <button class="btn-primary" id="registerBtn" onclick="handleRegister()">Create My Account</button>
+
+          <div class="form-footer">
+            Already have an account? <span class="form-link" onclick="showTab('login')">Sign in</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="security-badges">
+      <div class="security-badge"><div class="security-badge-dot"></div>256-bit AES Encryption</div>
+      <div class="security-badge"><div class="security-badge-dot"></div>TLS 1.3 All Endpoints</div>
+      <div class="security-badge"><div class="security-badge-dot"></div>SOC2 Compliant (Phase 5)</div>
+      <div class="security-badge"><div class="security-badge-dot"></div>CyberGuard AI Active</div>
+      <div class="security-badge"><div class="security-badge-dot"></div>GDPR Compliant</div>
+      <div class="security-badge"><div class="security-badge-dot"></div>99.94% Uptime SLA</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="auth-footer">
+  <div class="footer-brand">◈ IXIntel OS — Global Trade Intelligence</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Security</a>
+    <a href="#">Support</a>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   IXI AUTH SYSTEM
+   
+   CONFIG: Edit BACKEND_URL to point to your server
+   All API calls go through the API object
+   Tokens stored in localStorage for session
+═══════════════════════════════════════════════════ */
+
+const CONFIG = {
+  BACKEND_URL: 'https://tradeintel-backend-production.up.railway.app',
+};
+
+/* ── API LAYER ── */
+const API = {
+  async register(email, password, full_name) {
+    const res = await fetch(`${CONFIG.BACKEND_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, full_name }),
+    });
+    return res.json();
+  },
+
+  async login(email, password) {
+    const res = await fetch(`${CONFIG.BACKEND_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    return res.json();
+  },
+
+  async forgotPassword(email) {
+    const res = await fetch(`${CONFIG.BACKEND_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return res.json();
+  },
+};
+
+/* ── SESSION ── */
+const SESSION = {
+  save(token, user) {
+    localStorage.setItem('ixi_token', token);
+    localStorage.setItem('ixi_user', JSON.stringify(user));
+  },
+  get() {
+    return {
+      token: localStorage.getItem('ixi_token'),
+      user: JSON.parse(localStorage.getItem('ixi_user') || 'null'),
+    };
+  },
+  clear() {
+    localStorage.removeItem('ixi_token');
+    localStorage.removeItem('ixi_user');
+  },
+};
+
+/* ── UI HELPERS ── */
+function showAlert(id, msg, type = 'error') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `alert alert-${type} show`;
+}
+function hideAlert(id) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'alert';
+}
+function setLoading(btnId, loading, text) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading ? `<span class="spinner"></span>${text}` : text;
+}
+
+/* ── TABS ── */
+function showTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-tab')[tab === 'login' ? 0 : 1].classList.add('active');
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('forgotForm').style.display = 'none';
+  hideAlert('loginError'); hideAlert('loginSuccess');
+  hideAlert('registerError');
+}
+function showForgot() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'block';
+}
+function showLogin() {
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+}
+
+/* ── PLAN SELECTOR ── */
+let selectedPlan = 'starter';
+function selectPlan(el, plan) {
+  document.querySelectorAll('.plan-option').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlan = plan;
+}
+
+/* ── PASSWORD STRENGTH ── */
+function checkPasswordStrength(pw) {
+  const strength = document.getElementById('pwStrength');
+  const bars = [1,2,3,4].map(i => document.getElementById('pwBar'+i));
+  const label = document.getElementById('pwLabel');
+  if (!pw) { strength.classList.remove('show'); return; }
+  strength.classList.add('show');
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const colors = ['#ef4444','#f59e0b','#0099ff','#00e5b4'];
+  const labels = ['Too weak','Fair','Good','Strong'];
+  bars.forEach((b, i) => { b.style.background = i < score ? colors[score-1] : 'var(--bg-overlay)'; });
+  label.textContent = labels[score-1] || 'Enter a password';
+  label.style.color = score > 0 ? colors[score-1] : 'var(--text-muted)';
+}
+
+/* ── LOGIN ── */
+async function handleLogin() {
+  hideAlert('loginError'); hideAlert('loginSuccess');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { showAlert('loginError', 'Please enter your email and password.'); return; }
+  setLoading('loginBtn', true, 'Signing in...');
+  try {
+    const data = await API.login(email, password);
+    if (data.success) {
+      SESSION.save(data.token, data.user);
+      showAlert('loginSuccess', '✓ Signed in successfully! Redirecting...', 'success');
+      setTimeout(() => { window.location.href = '/'; }, 1200);
+    } else {
+      showAlert('loginError', data.error || 'Invalid email or password. Please try again.');
+    }
+  } catch (err) {
+    showAlert('loginError', 'Connection error. Please check your internet and try again.');
+  }
+  setLoading('loginBtn', false, 'Sign In to IXIntel');
+}
+
+/* ── REGISTER ── */
+async function handleRegister() {
+  hideAlert('registerError');
+  const first = document.getElementById('regFirst').value.trim();
+  const last = document.getElementById('regLast').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const terms = document.getElementById('termsCheck').checked;
+  if (!first || !last) { showAlert('registerError', 'Please enter your first and last name.'); return; }
+  if (!email) { showAlert('registerError', 'Please enter your email address.'); return; }
+  if (!password || password.length < 8) { showAlert('registerError', 'Password must be at least 8 characters.'); return; }
+  if (!terms) { showAlert('registerError', 'Please agree to the Terms of Service to continue.'); return; }
+  setLoading('registerBtn', true, 'Creating account...');
+  try {
+    const data = await API.register(email, password, `${first} ${last}`);
+    if (data.success) {
+      document.getElementById('registerFields').style.display = 'none';
+      document.getElementById('registerSuccess').classList.add('show');
+    } else {
+      showAlert('registerError', data.error || 'Registration failed. Please try again.');
+    }
+  } catch (err) {
+    showAlert('registerError', 'Connection error. Please check your internet and try again.');
+  }
+  setLoading('registerBtn', false, 'Create My Account');
+}
+
+/* ── FORGOT PASSWORD ── */
+async function handleForgot() {
+  hideAlert('forgotError'); hideAlert('forgotSuccess');
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showAlert('forgotError', 'Please enter your email address.'); return; }
+  setLoading('forgotBtn', true, 'Sending...');
+  try {
+    const data = await API.forgotPassword(email);
+    if (data.success) {
+      showAlert('forgotSuccess', '✓ Reset link sent! Check your inbox.', 'success');
+    } else {
+      showAlert('forgotError', data.error || 'Failed to send reset link.');
+    }
+  } catch (err) {
+    showAlert('forgotError', 'Connection error. Please try again.');
+  }
+  setLoading('forgotBtn', false, 'Send Reset Link');
+}
+
+/* ── GOOGLE LOGIN (placeholder) ── */
+function handleGoogleLogin() {
+  showAlert('loginError', 'Google OAuth coming soon! Please use email and password for now.');
+}
+
+/* ── TICKER ── */
+const tickerData = [
+  {l:'US IMPORTS',v:'$3.14T YTD',c:'+8.2%',up:true},
+  {l:'US EXPORTS',v:'$2.89T YTD',c:'+6.4%',up:true},
+  {l:'FBX FREIGHT INDEX',v:'$2,840',c:'-4.2%',up:false},
+  {l:'ACTIVE VESSELS',v:'5,842',c:'+1.2%',up:true},
+  {l:'VN→US IMPORTS',v:'$98.4B YTD',c:'+28.7%',up:true},
+  {l:'MX→US IMPORTS',v:'$186B YTD',c:'+22.1%',up:true},
+  {l:'CONTAINER RATE',v:'$1,920/FEU',c:'-8.4%',up:false},
+  {l:'IXIntel AGENTS',v:'5/5 LIVE',c:'100%',up:true},
+];
+const track = document.getElementById('tickerTrack');
+const html = tickerData.map(i => `<div class="ticker-item"><span class="ticker-label">${i.l}</span><span class="ticker-val">${i.v}</span><span class="${i.up?'ticker-up':'ticker-dn'}">${i.c}</span></div>`).join('');
+track.innerHTML = html + html;
+
+/* ── CHECK IF ALREADY LOGGED IN ── */
+const session = SESSION.get();
+if (session.token && window.location.pathname === '/login.html') {
+  window.location.href = '/';
+}
+</script>
+</body>
+</html>
