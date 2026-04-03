@@ -41,6 +41,10 @@ app.get("/login", (req, res) => {
   res.sendFile(__dirname + "/login.html");
 });
 
+app.get("/admin", (req, res) => {
+  res.sendFile(__dirname + "/admin.html");
+});
+
 // ── AGENT ROUTE ──
 app.post("/api/agent", async (req, res) => {
   try {

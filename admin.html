@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="description" content="IXIntel OS — Admin Console">
+<meta name="theme-color" content="#07090d">
+<title>IXIntel OS — Admin Console</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   IXIntel OS — ADMIN CONSOLE STYLESHEET
+═══════════════════════════════════════════════════════════════ */
+
+/* ── DESIGN TOKENS ── */
+:root {
+  --bg-base:     #07090d;
+  --bg-surface:  #0d1117;
+  --bg-elevated: #131920;
+  --bg-overlay:  #1a2230;
+  --bg-hover:    #222d3e;
+
+  --border-soft:   rgba(255,255,255,0.06);
+  --border-mid:    rgba(255,255,255,0.11);
+  --border-strong: rgba(255,255,255,0.20);
+
+  --text-primary:   #dde4ed;
+  --text-secondary: #7d8fa3;
+  --text-muted:     #3d5066;
+  --text-inverse:   #000000;
+
+  --accent:   #00e5b4;
+  --accent-h: #00c49a;
+  --blue:     #0099ff;
+  --amber:    #f59e0b;
+  --red:      #ef4444;
+  --purple:   #a78bfa;
+  --teal:     #2dd4bf;
+  --green:    #22c55e;
+  --orange:   #f97316;
+
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --transition: all 0.15s ease;
+}
+
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-sans); cursor: pointer; }
+input, select, textarea { font-family: var(--font-sans); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════════════ */
+.app-shell {
+  display: grid;
+  grid-template-rows: 48px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+.app-body {
+  display: flex;
+  overflow: hidden;
+  height: 100%;
+}
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-base);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════════════════════ */
+.topbar {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 0 var(--space-md);
+  gap: 0;
+  position: relative;
+  z-index: 100;
+}
+.topbar-logo {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 28px;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+.logo-mark {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+.admin-badge {
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.topbar-spacer { flex: 1; }
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.topbar-user:hover { background: var(--bg-hover); }
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--blue) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bg-base);
+}
+.user-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.user-role-tag {
+  font-size: 10px;
+  color: var(--red);
+  font-family: var(--font-mono);
+  background: rgba(239,68,68,0.1);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.topbar-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  transition: var(--transition);
+  letter-spacing: 0.3px;
+}
+.topbar-btn:hover { border-color: var(--border-strong); color: var(--text-primary); background: var(--bg-hover); }
+
+/* ═══════════════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════════════ */
+.sb-section {
+  padding: var(--space-md) 0 var(--space-sm);
+}
+.sb-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 var(--space-md);
+  margin-bottom: var(--space-xs);
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px var(--space-md);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  border-left: 2px solid transparent;
+  background: transparent;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  width: 100%;
+  text-align: left;
+}
+.sb-item:hover { color: var(--text-primary); background: rgba(255,255,255,0.03); }
+.sb-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,229,180,0.04); }
+.sb-item .sb-icon { font-size: 13px; width: 16px; text-align: center; }
+.sb-count {
+  margin-left: auto;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: var(--bg-elevated);
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: var(--text-muted);
+}
+.sb-divider {
+  height: 1px;
+  background: var(--border-soft);
+  margin: var(--space-xs) var(--space-md);
+}
+.sb-bottom {
+  margin-top: auto;
+  padding: var(--space-md);
+  border-top: 1px solid var(--border-soft);
+}
+.sb-version {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGES (VIEWS)
+═══════════════════════════════════════════════════════════════ */
+.page { display: none; padding: var(--space-xl); }
+.page.active { display: block; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+}
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+.page-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.page-actions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg-base);
+}
+.btn-primary:hover { background: var(--accent-h); }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  color: var(--text-secondary);
+}
+.btn-outline:hover { border-color: var(--border-strong); color: var(--text-primary); background: var(--bg-hover); }
+.btn-danger {
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: var(--red);
+}
+.btn-danger:hover { background: rgba(239,68,68,0.25); }
+.btn-success {
+  background: rgba(34,197,94,0.15);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: var(--green);
+}
+.btn-success:hover { background: rgba(34,197,94,0.25); }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+.btn-xs { padding: 3px 8px; font-size: 10px; border-radius: var(--radius-sm); }
+
+/* ═══════════════════════════════════════════════════════════════
+   KPI STRIP
+═══════════════════════════════════════════════════════════════ */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+.kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+.kpi-card:hover { border-color: var(--border-mid); }
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.kpi-card.accent::before { background: var(--accent); }
+.kpi-card.blue::before { background: var(--blue); }
+.kpi-card.amber::before { background: var(--amber); }
+.kpi-card.red::before { background: var(--red); }
+.kpi-card.purple::before { background: var(--purple); }
+.kpi-card.green::before { background: var(--green); }
+.kpi-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  line-height: 1;
+}
+.kpi-sub {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.kpi-delta {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  margin-top: 4px;
+}
+.kpi-delta.up { color: var(--green); }
+.kpi-delta.down { color: var(--red); }
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION CARDS
+═══════════════════════════════════════════════════════════════ */
+.section-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-lg);
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-soft);
+}
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title-icon { font-size: 14px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════════════════════ */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+thead th {
+  padding: 10px var(--space-lg);
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-soft);
+  white-space: nowrap;
+  background: var(--bg-elevated);
+  position: sticky;
+  top: 0;
+}
+tbody tr {
+  border-bottom: 1px solid var(--border-soft);
+  transition: var(--transition);
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody td {
+  padding: 10px var(--space-lg);
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+tbody td.text-primary { color: var(--text-primary); font-weight: 500; }
+.td-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.badge-user { background: rgba(125,143,163,0.15); color: #7d8fa3; border: 1px solid rgba(125,143,163,0.2); }
+.badge-admin { background: rgba(0,153,255,0.15); color: var(--blue); border: 1px solid rgba(0,153,255,0.2); }
+.badge-super_admin { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+.badge-manager { background: rgba(167,139,250,0.15); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+
+.badge-starter { background: rgba(61,80,102,0.3); color: var(--text-secondary); border: 1px solid var(--border-soft); }
+.badge-professional { background: rgba(0,153,255,0.12); color: var(--blue); border: 1px solid rgba(0,153,255,0.2); }
+.badge-business { background: rgba(0,229,180,0.12); color: var(--accent); border: 1px solid rgba(0,229,180,0.2); }
+.badge-enterprise { background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+
+.badge-active { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+.badge-suspended { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+/* ── TABLE TOOLBAR ── */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--bg-elevated);
+}
+.search-input {
+  flex: 1;
+  max-width: 280px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  padding: 6px 10px 6px 30px;
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  transition: var(--transition);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d8fa3' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text-muted); }
+.filter-select {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  color: var(--text-primary);
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+}
+.filter-select:focus { border-color: var(--accent); }
+.table-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* ── ACTIONS COLUMN ── */
+.td-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── USER INFO CELL ── */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.user-cell-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bg-overlay) 0%, var(--bg-hover) 100%);
+  border: 1px solid var(--border-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.user-cell-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+.user-cell-email { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  width: 420px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: modalIn 0.15s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.97) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+.modal-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+}
+.modal-field {
+  margin-bottom: var(--space-md);
+}
+.modal-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.modal-select, .modal-input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: var(--transition);
+}
+.modal-select:focus, .modal-input:focus { border-color: var(--accent); }
+.modal-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-lg);
+}
+.modal-user-info {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.modal-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--blue) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bg-base);
+  flex-shrink: 0;
+}
+.modal-user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.modal-user-email { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.toast {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-lg);
+  padding: 12px var(--space-md);
+  font-size: 12px;
+  color: var(--text-primary);
+  max-width: 320px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.2s ease;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error   { border-left: 3px solid var(--red); }
+.toast.info    { border-left: 3px solid var(--blue); }
+.toast-icon { font-size: 14px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESS DENIED / AUTH GATE
+═══════════════════════════════════════════════════════════════ */
+#auth-gate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg-base);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+#auth-gate.visible { display: flex; }
+.auth-gate-icon { font-size: 48px; }
+.auth-gate-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.auth-gate-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 360px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOADING STATE
+═══════════════════════════════════════════════════════════════ */
+.loading-row td {
+  text-align: center;
+  padding: var(--space-xl) !important;
+  color: var(--text-muted);
+}
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-mid);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANALYTICS PAGE
+═══════════════════════════════════════════════════════════════ */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+.plan-dist-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--space-lg);
+}
+.dist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dist-label {
+  width: 90px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.dist-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.dist-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+.dist-fill.starter { background: var(--text-muted); }
+.dist-fill.professional { background: var(--blue); }
+.dist-fill.business { background: var(--accent); }
+.dist-fill.enterprise { background: var(--amber); }
+.dist-count {
+  width: 40px;
+  text-align: right;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ── ROLE DIST ── */
+.role-list {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.role-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+}
+.role-row-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.role-row-count {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+/* ── RECENT SIGNUPS ── */
+.recent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px var(--space-lg);
+  border-bottom: 1px solid var(--border-soft);
+  transition: var(--transition);
+}
+.recent-row:last-child { border-bottom: none; }
+.recent-row:hover { background: rgba(255,255,255,0.02); }
+.recent-info { flex: 1; }
+.recent-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+.recent-email { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+.recent-time { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); white-space: nowrap; }
+
+/* ═══════════════════════════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════════════════════════ */
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-xl);
+  color: var(--text-muted);
+}
+.empty-state-icon { font-size: 32px; margin-bottom: var(--space-md); }
+.empty-state-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+.empty-state-sub { font-size: 12px; }
+
+/* ── STATUS INDICATOR ── */
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.status-dot.active { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.status-dot.suspended { background: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ── AUTH GATE ── -->
+<div id="auth-gate">
+  <div class="auth-gate-icon">🔒</div>
+  <div class="auth-gate-title">Admin Access Required</div>
+  <div class="auth-gate-sub">You must be logged in as an admin or super_admin to access this console.</div>
+  <div style="display:flex;gap:12px;margin-top:8px;">
+    <a href="/login" class="btn btn-primary">Go to Login</a>
+    <a href="/" class="btn btn-outline">Back to Dashboard</a>
+  </div>
+</div>
+
+<!-- ── APP SHELL ── -->
+<div class="app-shell" id="app-shell" style="display:none;">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-mark">IX</div>
+      IXIntel
+    </div>
+    <span class="admin-badge">Admin Console</span>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-user" id="topbar-user">
+      <div class="user-avatar" id="user-avatar-initials">–</div>
+      <div>
+        <div class="user-name" id="user-display-name">Loading…</div>
+        <div class="user-role-tag" id="user-role-display">–</div>
+      </div>
+    </div>
+    <a href="/" class="topbar-btn" style="margin-left:12px;">← Main Dashboard</a>
+    <button class="topbar-btn" id="logout-btn" style="margin-left:8px;">Logout</button>
+  </header>
+
+  <!-- APP BODY -->
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sb-section">
+        <div class="sb-label">Overview</div>
+        <button class="sb-item active" data-page="analytics" onclick="showPage('analytics',this)">
+          <span class="sb-icon">📊</span> Analytics
+        </button>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-section">
+        <div class="sb-label">User Management</div>
+        <button class="sb-item" data-page="users" onclick="showPage('users',this)">
+          <span class="sb-icon">👥</span> All Users
+          <span class="sb-count" id="sb-user-count">–</span>
+        </button>
+        <button class="sb-item" data-page="admins" onclick="showPage('admins',this)">
+          <span class="sb-icon">🛡</span> Admins
+          <span class="sb-count" id="sb-admin-count">–</span>
+        </button>
+        <button class="sb-item" data-page="suspended" onclick="showPage('suspended',this)">
+          <span class="sb-icon">🚫</span> Suspended
+          <span class="sb-count" id="sb-suspended-count">–</span>
+        </button>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-section">
+        <div class="sb-label">Plans</div>
+        <button class="sb-item" data-page="plans" onclick="showPage('plans',this)">
+          <span class="sb-icon">💳</span> Subscriptions
+        </button>
+      </div>
+      <div class="sb-bottom">
+        <div class="sb-version" id="sb-last-refresh">–</div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- ══════════════════════════════════
+           PAGE: ANALYTICS
+      ══════════════════════════════════ -->
+      <div class="page active" id="page-analytics">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Platform Analytics</div>
+            <div class="page-subtitle">Real-time platform overview and growth metrics</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-outline" onclick="refreshAll()">↻ Refresh</button>
+          </div>
+        </div>
+
+        <!-- KPI STRIP -->
+        <div class="kpi-strip">
+          <div class="kpi-card accent">
+            <div class="kpi-label">Total Users</div>
+            <div class="kpi-value" id="stat-total">–</div>
+            <div class="kpi-sub">registered accounts</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">New Today</div>
+            <div class="kpi-value" id="stat-today">–</div>
+            <div class="kpi-sub">signed up today</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-label">Paid Users</div>
+            <div class="kpi-value" id="stat-paid">–</div>
+            <div class="kpi-sub">pro + business + enterprise</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label">Suspended</div>
+            <div class="kpi-value" id="stat-suspended">–</div>
+            <div class="kpi-sub">accounts suspended</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label">Admins</div>
+            <div class="kpi-value" id="stat-admins">–</div>
+            <div class="kpi-sub">admin + super_admin</div>
+          </div>
+          <div class="kpi-card purple">
+            <div class="kpi-label">Enterprise</div>
+            <div class="kpi-value" id="stat-enterprise">–</div>
+            <div class="kpi-sub">enterprise plan</div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="analytics-grid">
+          <!-- Plan Distribution -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-title"><span class="section-title-icon">💳</span> Plan Distribution</div>
+            </div>
+            <div class="plan-dist-bar" id="plan-dist">
+              <div style="color:var(--text-muted);font-size:12px;padding:8px 0;">Loading…</div>
+            </div>
+          </div>
+
+          <!-- Role Breakdown -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-title"><span class="section-title-icon">🎭</span> Role Breakdown</div>
+            </div>
+            <div class="role-list" id="role-breakdown">
+              <div style="color:var(--text-muted);font-size:12px;">Loading…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Signups -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title"><span class="section-title-icon">🆕</span> Recent Signups</div>
+          </div>
+          <div id="recent-signups">
+            <div style="color:var(--text-muted);font-size:12px;padding:var(--space-lg);">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           PAGE: ALL USERS
+      ══════════════════════════════════ -->
+      <div class="page" id="page-users">
+        <div class="page-header">
+          <div>
+            <div class="page-title">All Users</div>
+            <div class="page-subtitle">Manage accounts, roles, and plans</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-outline" onclick="refreshAll()">↻ Refresh</button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="table-toolbar">
+            <input type="text" class="search-input" id="user-search" placeholder="Search name or email…" oninput="filterUsers()">
+            <select class="filter-select" id="role-filter" onchange="filterUsers()">
+              <option value="">All Roles</option>
+              <option value="user">User</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
+            <select class="filter-select" id="plan-filter" onchange="filterUsers()">
+              <option value="">All Plans</option>
+              <option value="starter">Starter</option>
+              <option value="professional">Professional</option>
+              <option value="business">Business</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+            <select class="filter-select" id="status-filter" onchange="filterUsers()">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+            <span class="table-count" id="user-count-label">– users</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Searches</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr class="loading-row"><td colspan="7"><span class="loading-spinner"></span>Loading users…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           PAGE: ADMINS
+      ══════════════════════════════════ -->
+      <div class="page" id="page-admins">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Admins</div>
+            <div class="page-subtitle">Admin and super_admin accounts</div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Plan</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admins-tbody">
+                <tr class="loading-row"><td colspan="5"><span class="loading-spinner"></span>Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           PAGE: SUSPENDED
+      ══════════════════════════════════ -->
+      <div class="page" id="page-suspended">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Suspended Accounts</div>
+            <div class="page-subtitle">Accounts that have been suspended</div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Plan</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="suspended-tbody">
+                <tr class="loading-row"><td colspan="5"><span class="loading-spinner"></span>Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           PAGE: PLANS / SUBSCRIPTIONS
+      ══════════════════════════════════ -->
+      <div class="page" id="page-plans">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Subscriptions</div>
+            <div class="page-subtitle">User plan management and billing overview</div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Current Plan</th>
+                  <th>Searches Used</th>
+                  <th>Searches Limit</th>
+                  <th>Joined</th>
+                  <th>Change Plan</th>
+                </tr>
+              </thead>
+              <tbody id="plans-tbody">
+                <tr class="loading-row"><td colspan="6"><span class="loading-spinner"></span>Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main><!-- /main-content -->
+  </div><!-- /app-body -->
+</div><!-- /app-shell -->
+
+<!-- ══════════════════════════════════════════
+     MODAL: CHANGE ROLE
+════════════════════════════════════════════ -->
+<div class="modal-overlay" id="role-modal">
+  <div class="modal">
+    <div class="modal-title">Change User Role</div>
+    <div class="modal-subtitle">Assign a new role for this user. Role changes take effect immediately.</div>
+    <div class="modal-user-info" id="role-modal-user-info"></div>
+    <div class="modal-field">
+      <label class="modal-label">New Role</label>
+      <select class="modal-select" id="role-modal-select">
+        <option value="user">User</option>
+        <option value="manager">Manager</option>
+        <option value="admin">Admin</option>
+        <option value="super_admin">Super Admin</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('role-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmRoleChange()">Save Role</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: CHANGE PLAN
+════════════════════════════════════════════ -->
+<div class="modal-overlay" id="plan-modal">
+  <div class="modal">
+    <div class="modal-title">Change Subscription Plan</div>
+    <div class="modal-subtitle">Update the user's plan. Search limits will be adjusted automatically.</div>
+    <div class="modal-user-info" id="plan-modal-user-info"></div>
+    <div class="modal-field">
+      <label class="modal-label">New Plan</label>
+      <select class="modal-select" id="plan-modal-select">
+        <option value="starter">Starter (500 searches)</option>
+        <option value="professional">Professional (Unlimited)</option>
+        <option value="business">Business (Unlimited)</option>
+        <option value="enterprise">Enterprise (Unlimited)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('plan-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmPlanChange()">Save Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: SUSPEND / UNSUSPEND CONFIRM
+════════════════════════════════════════════ -->
+<div class="modal-overlay" id="suspend-modal">
+  <div class="modal">
+    <div class="modal-title" id="suspend-modal-title">Suspend Account</div>
+    <div class="modal-subtitle" id="suspend-modal-subtitle">This will prevent the user from logging in.</div>
+    <div class="modal-user-info" id="suspend-modal-user-info"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('suspend-modal')">Cancel</button>
+      <button class="btn btn-danger" id="suspend-modal-confirm" onclick="confirmSuspend()">Suspend Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ── -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   IXIntel Admin Console — JS
+   Routes: /auth/admin/users  /auth/admin/stats
+           /auth/admin/users/:id/role
+           /auth/admin/users/:id/plan
+           /auth/admin/users/:id/suspend
+══════════════════════════════════════════════════════════ */
+
+const BACKEND = 'https://tradeintel-backend-production.up.railway.app';
+
+// ── STATE ──
+let currentUser = null;
+let allUsers = [];
+let targetUserId = null;
+let suspendAction = null; // 'suspend' | 'unsuspend'
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('ixintel_token');
+  if (!token) {
+    showAuthGate();
+    return;
+  }
+  try {
+    const res = await apiFetch('/auth/me', { headers: authHeaders(token) });
+    const data = await res.json();
+    if (!data.success || !['admin', 'super_admin'].includes(data.user?.role)) {
+      showAuthGate();
+      return;
+    }
+    currentUser = data.user;
+    showApp();
+    populateTopbar();
+    await refreshAll();
+  } catch (e) {
+    showAuthGate();
+  }
+});
+
+function showAuthGate() {
+  document.getElementById('auth-gate').classList.add('visible');
+}
+
+function showApp() {
+  document.getElementById('app-shell').style.display = 'grid';
+}
+
+function populateTopbar() {
+  const initials = (currentUser.full_name || currentUser.email || 'A')
+    .split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('user-avatar-initials').textContent = initials;
+  document.getElementById('user-display-name').textContent = currentUser.full_name || currentUser.email;
+  document.getElementById('user-role-display').textContent = currentUser.role;
+}
+
+document.getElementById('logout-btn').onclick = async () => {
+  try {
+    const token = localStorage.getItem('ixintel_token');
+    await apiFetch('/auth/logout', { method: 'POST', headers: authHeaders(token) });
+  } catch {}
+  localStorage.removeItem('ixintel_token');
+  localStorage.removeItem('ixintel_user');
+  window.location.href = '/login';
+};
+
+// ══════════════════════════════════════════════════════════
+// DATA FETCHING
+// ══════════════════════════════════════════════════════════
+async function refreshAll() {
+  const token = localStorage.getItem('ixintel_token');
+  try {
+    const [usersRes, statsRes] = await Promise.all([
+      apiFetch('/auth/admin/users', { headers: authHeaders(token) }),
+      apiFetch('/auth/admin/stats', { headers: authHeaders(token) })
+    ]);
+    const usersData = await usersRes.json();
+    const statsData = await statsRes.json();
+
+    if (usersData.success) {
+      allUsers = usersData.users || [];
+      renderAllTables();
+    }
+    if (statsData.success) {
+      renderStats(statsData.stats);
+    }
+    updateSidebarCounts();
+    updateLastRefresh();
+  } catch (e) {
+    toast('Failed to load data: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER STATS
+// ══════════════════════════════════════════════════════════
+function renderStats(stats) {
+  const suspended = allUsers.filter(u => u.plan_status === 'suspended').length;
+  const paid = (stats.by_plan?.professional || 0)
+             + (stats.by_plan?.business || 0)
+             + (stats.by_plan?.enterprise || 0);
+
+  setEl('stat-total', stats.total_users ?? allUsers.length);
+  setEl('stat-today', stats.new_today ?? 0);
+  setEl('stat-paid', paid);
+  setEl('stat-suspended', suspended);
+  setEl('stat-admins', stats.admins ?? 0);
+  setEl('stat-enterprise', stats.by_plan?.enterprise ?? 0);
+
+  // Plan distribution
+  const total = stats.total_users || 1;
+  const plans = ['starter','professional','business','enterprise'];
+  const planLabels = { starter:'Starter', professional:'Pro', business:'Business', enterprise:'Enterprise' };
+  document.getElementById('plan-dist').innerHTML = plans.map(p => {
+    const count = stats.by_plan?.[p] || 0;
+    const pct = Math.round((count / total) * 100);
+    return `<div class="dist-row">
+      <div class="dist-label">${planLabels[p]}</div>
+      <div class="dist-track"><div class="dist-fill ${p}" style="width:${pct}%"></div></div>
+      <div class="dist-count">${count}</div>
+    </div>`;
+  }).join('');
+
+  // Role breakdown
+  const roles = ['user','manager','admin','super_admin'];
+  const roleCounts = {};
+  roles.forEach(r => roleCounts[r] = allUsers.filter(u => u.role === r).length);
+  document.getElementById('role-breakdown').innerHTML = roles.map(r => `
+    <div class="role-row">
+      <span class="role-row-label"><span class="badge badge-${r}">${r}</span></span>
+      <span class="role-row-count">${roleCounts[r]}</span>
+    </div>`).join('');
+
+  // Recent signups (last 10, sorted newest first)
+  const recent = [...allUsers]
+    .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 10);
+  document.getElementById('recent-signups').innerHTML = recent.length
+    ? recent.map(u => `
+      <div class="recent-row">
+        <div class="user-cell-avatar">${getInitials(u.full_name || u.email)}</div>
+        <div class="recent-info">
+          <div class="recent-name">${esc(u.full_name || '—')}</div>
+          <div class="recent-email">${esc(u.email || u.id)}</div>
+        </div>
+        <span class="badge badge-${u.plan || 'starter'}">${u.plan || 'starter'}</span>
+        <div class="recent-time">${timeAgo(u.created_at)}</div>
+      </div>`).join('')
+    : '<div class="empty-state"><div class="empty-state-icon">👤</div><div class="empty-state-title">No users yet</div></div>';
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER TABLES
+// ══════════════════════════════════════════════════════════
+function renderAllTables() {
+  renderUsersTable(allUsers);
+  renderAdminsTable();
+  renderSuspendedTable();
+  renderPlansTable();
+}
+
+// ── USERS TABLE ──
+function renderUsersTable(users) {
+  document.getElementById('user-count-label').textContent = users.length + ' users';
+  const tbody = document.getElementById('users-tbody');
+  if (!users.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-title">No users found</div><div class="empty-state-sub">Try adjusting the filters.</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = users.map(u => userRow(u, true)).join('');
+}
+
+function userRow(u, full = false) {
+  const isSelf = u.id === currentUser?.id;
+  const suspended = u.plan_status === 'suspended';
+  const canEdit = currentUser?.role === 'super_admin' || (currentUser?.role === 'admin' && u.role === 'user');
+
+  const actions = canEdit ? `
+    <div class="td-actions">
+      <button class="btn btn-xs btn-outline" onclick="openRoleModal('${u.id}')">Role</button>
+      <button class="btn btn-xs btn-outline" onclick="openPlanModal('${u.id}')">Plan</button>
+      ${!isSelf ? (suspended
+        ? `<button class="btn btn-xs btn-success" onclick="openSuspendModal('${u.id}','unsuspend')">Restore</button>`
+        : `<button class="btn btn-xs btn-danger" onclick="openSuspendModal('${u.id}','suspend')">Suspend</button>`)
+      : '<span style="color:var(--text-muted);font-size:10px;">(you)</span>'}
+    </div>` : '<span style="color:var(--text-muted);font-size:10px;">—</span>';
+
+  const usage = u.searches_limit === -1
+    ? `${u.searches_used || 0} / ∞`
+    : `${u.searches_used || 0} / ${u.searches_limit || 500}`;
+
+  return `<tr>
+    <td class="text-primary">
+      <div class="user-cell">
+        <div class="user-cell-avatar">${getInitials(u.full_name || u.email)}</div>
+        <div>
+          <div class="user-cell-name">${esc(u.full_name || '—')}</div>
+          <div class="user-cell-email">${esc(u.email || u.id)}</div>
+        </div>
+      </div>
+    </td>
+    <td><span class="badge badge-${u.role || 'user'}">${u.role || 'user'}</span></td>
+    <td><span class="badge badge-${u.plan || 'starter'}">${u.plan || 'starter'}</span></td>
+    <td>
+      <span class="status-dot ${suspended ? 'suspended' : 'active'}"></span>
+      <span class="badge badge-${suspended ? 'suspended' : 'active'}">${suspended ? 'suspended' : 'active'}</span>
+    </td>
+    <td class="td-mono">${usage}</td>
+    <td class="td-mono" style="color:var(--text-muted);">${fmtDate(u.created_at)}</td>
+    <td>${actions}</td>
+  </tr>`;
+}
+
+// ── ADMINS TABLE ──
+function renderAdminsTable() {
+  const admins = allUsers.filter(u => ['admin','super_admin'].includes(u.role));
+  const tbody = document.getElementById('admins-tbody');
+  tbody.innerHTML = admins.length
+    ? admins.map(u => `<tr>
+        <td class="text-primary">
+          <div class="user-cell">
+            <div class="user-cell-avatar">${getInitials(u.full_name || u.email)}</div>
+            <div>
+              <div class="user-cell-name">${esc(u.full_name || '—')}</div>
+              <div class="user-cell-email">${esc(u.email || u.id)}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge badge-${u.role}">${u.role}</span></td>
+        <td><span class="badge badge-${u.plan || 'starter'}">${u.plan || 'starter'}</span></td>
+        <td class="td-mono" style="color:var(--text-muted);">${fmtDate(u.created_at)}</td>
+        <td>
+          ${u.id !== currentUser?.id && currentUser?.role === 'super_admin'
+            ? `<button class="btn btn-xs btn-outline" onclick="openRoleModal('${u.id}')">Change Role</button>`
+            : '—'}
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">🛡</div><div class="empty-state-title">No admins found</div></div></td></tr>`;
+}
+
+// ── SUSPENDED TABLE ──
+function renderSuspendedTable() {
+  const suspended = allUsers.filter(u => u.plan_status === 'suspended');
+  const tbody = document.getElementById('suspended-tbody');
+  tbody.innerHTML = suspended.length
+    ? suspended.map(u => `<tr>
+        <td class="text-primary">
+          <div class="user-cell">
+            <div class="user-cell-avatar" style="opacity:0.5;">${getInitials(u.full_name || u.email)}</div>
+            <div>
+              <div class="user-cell-name" style="opacity:0.7;">${esc(u.full_name || '—')}</div>
+              <div class="user-cell-email">${esc(u.email || u.id)}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge badge-${u.role || 'user'}">${u.role || 'user'}</span></td>
+        <td><span class="badge badge-${u.plan || 'starter'}">${u.plan || 'starter'}</span></td>
+        <td class="td-mono" style="color:var(--text-muted);">${fmtDate(u.created_at)}</td>
+        <td>
+          <button class="btn btn-xs btn-success" onclick="openSuspendModal('${u.id}','unsuspend')">Restore Account</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-title">No suspended accounts</div></div></td></tr>`;
+}
+
+// ── PLANS TABLE ──
+function renderPlansTable() {
+  const tbody = document.getElementById('plans-tbody');
+  tbody.innerHTML = allUsers.map(u => {
+    const usage = u.searches_limit === -1
+      ? `${u.searches_used || 0}`
+      : `${u.searches_used || 0}`;
+    const limit = u.searches_limit === -1 ? '∞' : (u.searches_limit || 500);
+    const pct = u.searches_limit > 0
+      ? Math.min(100, Math.round(((u.searches_used || 0) / u.searches_limit) * 100))
+      : 0;
+    return `<tr>
+      <td class="text-primary">
+        <div class="user-cell">
+          <div class="user-cell-avatar">${getInitials(u.full_name || u.email)}</div>
+          <div>
+            <div class="user-cell-name">${esc(u.full_name || '—')}</div>
+            <div class="user-cell-email">${esc(u.email || u.id)}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge badge-${u.plan || 'starter'}">${u.plan || 'starter'}</span></td>
+      <td class="td-mono">${usage}</td>
+      <td class="td-mono">${limit}</td>
+      <td class="td-mono" style="color:var(--text-muted);">${fmtDate(u.created_at)}</td>
+      <td>
+        <button class="btn btn-xs btn-outline" onclick="openPlanModal('${u.id}')">Change Plan</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// FILTERING
+// ══════════════════════════════════════════════════════════
+function filterUsers() {
+  const q = document.getElementById('user-search').value.toLowerCase();
+  const role = document.getElementById('role-filter').value;
+  const plan = document.getElementById('plan-filter').value;
+  const status = document.getElementById('status-filter').value;
+
+  const filtered = allUsers.filter(u => {
+    const name = (u.full_name || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    const matchQ = !q || name.includes(q) || email.includes(q);
+    const matchRole = !role || u.role === role;
+    const matchPlan = !plan || u.plan === plan;
+    const suspended = u.plan_status === 'suspended';
+    const matchStatus = !status
+      || (status === 'active' && !suspended)
+      || (status === 'suspended' && suspended);
+    return matchQ && matchRole && matchPlan && matchStatus;
+  });
+  renderUsersTable(filtered);
+}
+
+// ══════════════════════════════════════════════════════════
+// MODALS — ROLE
+// ══════════════════════════════════════════════════════════
+function openRoleModal(userId) {
+  if (currentUser?.role !== 'super_admin') {
+    toast('Super admin access required to change roles.', 'error');
+    return;
+  }
+  targetUserId = userId;
+  const u = allUsers.find(x => x.id === userId);
+  if (!u) return;
+  document.getElementById('role-modal-user-info').innerHTML = modalUserInfo(u);
+  document.getElementById('role-modal-select').value = u.role || 'user';
+  openModal('role-modal');
+}
+
+async function confirmRoleChange() {
+  const newRole = document.getElementById('role-modal-select').value;
+  const token = localStorage.getItem('ixintel_token');
+  try {
+    const res = await apiFetch(`/auth/admin/users/${targetUserId}/role`, {
+      method: 'PUT',
+      headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: newRole })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    closeModal('role-modal');
+    toast('Role updated successfully.', 'success');
+    await refreshAll();
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// MODALS — PLAN
+// ══════════════════════════════════════════════════════════
+function openPlanModal(userId) {
+  targetUserId = userId;
+  const u = allUsers.find(x => x.id === userId);
+  if (!u) return;
+  document.getElementById('plan-modal-user-info').innerHTML = modalUserInfo(u);
+  document.getElementById('plan-modal-select').value = u.plan || 'starter';
+  openModal('plan-modal');
+}
+
+async function confirmPlanChange() {
+  const newPlan = document.getElementById('plan-modal-select').value;
+  const token = localStorage.getItem('ixintel_token');
+  try {
+    const res = await apiFetch(`/auth/admin/users/${targetUserId}/plan`, {
+      method: 'PUT',
+      headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: newPlan })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    closeModal('plan-modal');
+    toast('Plan updated successfully.', 'success');
+    await refreshAll();
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// MODALS — SUSPEND
+// ══════════════════════════════════════════════════════════
+function openSuspendModal(userId, action) {
+  targetUserId = userId;
+  suspendAction = action;
+  const u = allUsers.find(x => x.id === userId);
+  if (!u) return;
+  const isSuspending = action === 'suspend';
+  document.getElementById('suspend-modal-title').textContent = isSuspending ? 'Suspend Account' : 'Restore Account';
+  document.getElementById('suspend-modal-subtitle').textContent = isSuspending
+    ? 'This will prevent the user from logging in until restored.'
+    : 'This will restore full account access for this user.';
+  document.getElementById('suspend-modal-user-info').innerHTML = modalUserInfo(u);
+  const confirmBtn = document.getElementById('suspend-modal-confirm');
+  if (isSuspending) {
+    confirmBtn.textContent = 'Suspend Account';
+    confirmBtn.className = 'btn btn-danger';
+  } else {
+    confirmBtn.textContent = 'Restore Account';
+    confirmBtn.className = 'btn btn-success';
+  }
+  openModal('suspend-modal');
+}
+
+async function confirmSuspend() {
+  const token = localStorage.getItem('ixintel_token');
+  try {
+    const res = await apiFetch(`/auth/admin/users/${targetUserId}/suspend`, {
+      method: 'PUT',
+      headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ suspend: suspendAction === 'suspend' })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    closeModal('suspend-modal');
+    toast(suspendAction === 'suspend' ? 'Account suspended.' : 'Account restored.', 'success');
+    await refreshAll();
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// SIDEBAR COUNTS & PAGE NAV
+// ══════════════════════════════════════════════════════════
+function updateSidebarCounts() {
+  setEl('sb-user-count', allUsers.length);
+  setEl('sb-admin-count', allUsers.filter(u => ['admin','super_admin'].includes(u.role)).length);
+  setEl('sb-suspended-count', allUsers.filter(u => u.plan_status === 'suspended').length);
+}
+
+function updateLastRefresh() {
+  setEl('sb-last-refresh', 'Refreshed ' + new Date().toLocaleTimeString());
+}
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  btn?.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type] || '•'}</span><span>${esc(msg)}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ══════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+function modalUserInfo(u) {
+  return `<div class="modal-user-avatar">${getInitials(u.full_name || u.email)}</div>
+    <div>
+      <div class="modal-user-name">${esc(u.full_name || '—')}</div>
+      <div class="modal-user-email">${esc(u.email || u.id)}</div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+function apiFetch(path, opts = {}) {
+  return fetch(BACKEND + path, opts);
+}
+function authHeaders(token) {
+  return { 'Authorization': 'Bearer ' + token };
+}
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function getInitials(name) {
+  return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) || '?';
+}
+function fmtDate(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+}
+function timeAgo(dt) {
+  if (!dt) return '—';
+  const diff = Date.now() - new Date(dt).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+</script>
+</body>
+</html>
