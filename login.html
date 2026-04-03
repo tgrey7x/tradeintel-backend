@@ -8,12 +8,7 @@
 <style>
 /* ═══════════════════════════════════════════════════════
    IXI AUTH PAGE — LOGIN & REGISTER
-   
-   HOW TO MODIFY:
-   - Colors → edit :root variables
-   - Backend URL → edit CONFIG.BACKEND_URL
-   - Add OAuth providers → add buttons in html
-   - Change logo/tagline → edit .brand section
+   Bloomberg-dark theme, connected to /auth/* backend
 ═══════════════════════════════════════════════════════ */
 
 :root {
@@ -182,7 +177,6 @@ body {
   display: flex;
   gap: 32px;
 }
-.stat-item { }
 .stat-value {
   font-family: var(--font-mono);
   font-size: 20px;
@@ -279,6 +273,27 @@ body {
 .form-input.success { border-color: var(--accent); }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── PASSWORD WRAPPER ── */
+.pw-wrapper {
+  position: relative;
+}
+.pw-wrapper .form-input { padding-right: 42px; }
+.pw-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.pw-toggle:hover { color: var(--text-secondary); }
 
 /* ── BUTTONS ── */
 .btn-primary {
@@ -523,7 +538,7 @@ body {
   <!-- LEFT PANEL -->
   <div class="left-panel">
     <a href="/" class="brand-mark">
-      <div class="brand-icon">◈</div>
+      <div class="brand-icon">&#9672;</div>
       IXIntel OS
     </a>
     <div class="hero-eyebrow">Global Trade Intelligence Platform</div>
@@ -565,11 +580,14 @@ body {
 
         <div class="form-group">
           <label class="form-label">Email Address</label>
-          <input type="email" class="form-input" id="loginEmail" placeholder="you@company.com" onkeydown="if(event.key==='Enter')handleLogin()">
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@company.com" autocomplete="email" onkeydown="if(event.key==='Enter')handleLogin()">
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()">
+          <div class="pw-wrapper">
+            <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleLogin()">
+            <button type="button" class="pw-toggle" onclick="togglePw('loginPassword', this)" aria-label="Toggle password visibility">&#9673;</button>
+          </div>
           <a class="forgot-link" onclick="showForgot()">Forgot password?</a>
         </div>
 
@@ -589,11 +607,11 @@ body {
         <div class="alert alert-error" id="forgotError"></div>
         <div class="form-group">
           <label class="form-label">Email Address</label>
-          <input type="email" class="form-input" id="forgotEmail" placeholder="you@company.com">
+          <input type="email" class="form-input" id="forgotEmail" placeholder="you@company.com" autocomplete="email" onkeydown="if(event.key==='Enter')handleForgot()">
         </div>
         <button class="btn-primary" id="forgotBtn" onclick="handleForgot()">Send Reset Link</button>
         <div class="form-footer" style="margin-top:14px;">
-          <span class="form-link" onclick="showLogin()">← Back to sign in</span>
+          <span class="form-link" onclick="showLogin()">&larr; Back to sign in</span>
         </div>
       </div>
 
@@ -602,7 +620,7 @@ body {
         <div class="alert alert-error" id="registerError"></div>
 
         <div class="success-state" id="registerSuccess">
-          <div class="success-icon">✓</div>
+          <div class="success-icon">&#10003;</div>
           <div class="success-title">Account Created!</div>
           <div class="success-sub">Check your email to verify your account.<br>Then sign in to access IXIntel OS.</div>
           <button class="btn-primary" style="margin-top:20px;" onclick="showTab('login')">Go to Sign In</button>
@@ -618,22 +636,25 @@ body {
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">First Name</label>
-              <input type="text" class="form-input" id="regFirst" placeholder="Tony">
+              <input type="text" class="form-input" id="regFirst" placeholder="Tony" autocomplete="given-name">
             </div>
             <div class="form-group">
               <label class="form-label">Last Name</label>
-              <input type="text" class="form-input" id="regLast" placeholder="G">
+              <input type="text" class="form-input" id="regLast" placeholder="G" autocomplete="family-name">
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label">Work Email</label>
-            <input type="email" class="form-input" id="regEmail" placeholder="you@company.com">
+            <input type="email" class="form-input" id="regEmail" placeholder="you@company.com" autocomplete="email">
           </div>
 
           <div class="form-group">
             <label class="form-label">Password</label>
-            <input type="password" class="form-input" id="regPassword" placeholder="Min. 8 characters" oninput="checkPasswordStrength(this.value)">
+            <div class="pw-wrapper">
+              <input type="password" class="form-input" id="regPassword" placeholder="Min. 8 characters" autocomplete="new-password" oninput="checkPasswordStrength(this.value)">
+              <button type="button" class="pw-toggle" onclick="togglePw('regPassword', this)" aria-label="Toggle password visibility">&#9673;</button>
+            </div>
             <div class="pw-strength" id="pwStrength">
               <div class="pw-bars">
                 <div class="pw-bar" id="pwBar1"></div>
@@ -707,7 +728,7 @@ body {
 
 <!-- FOOTER -->
 <div class="auth-footer">
-  <div class="footer-brand">◈ IXIntel OS — Global Trade Intelligence</div>
+  <div class="footer-brand">&#9672; IXIntel OS — Global Trade Intelligence</div>
   <div class="footer-links">
     <a href="#">Privacy</a>
     <a href="#">Terms</a>
@@ -718,44 +739,41 @@ body {
 
 <script>
 /* ═══════════════════════════════════════════════════
-   IXI AUTH SYSTEM
-   
-   CONFIG: Edit BACKEND_URL to point to your server
-   All API calls go through the API object
-   Tokens stored in localStorage for session
+   IXI AUTH SYSTEM — Connected to /auth/* routes
+   Uses relative URLs so it works on any environment
 ═══════════════════════════════════════════════════ */
 
-const CONFIG = {
-  BACKEND_URL: 'https://tradeintel-backend-production.up.railway.app',
-};
-
-/* ── API LAYER ── */
+/* ── API LAYER (relative paths — works locally + production) ── */
 const API = {
-  async register(email, password, full_name) {
-    const res = await fetch(`${CONFIG.BACKEND_URL}/auth/register`, {
+  async post(path, body) {
+    const res = await fetch(path, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, full_name }),
+      body: JSON.stringify(body),
     });
     return res.json();
   },
-
-  async login(email, password) {
-    const res = await fetch(`${CONFIG.BACKEND_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+  async get(path, token) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(path, { headers });
     return res.json();
   },
 
-  async forgotPassword(email) {
-    const res = await fetch(`${CONFIG.BACKEND_URL}/auth/forgot-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    return res.json();
+  register(email, password, full_name) {
+    return this.post('/auth/register', { email, password, full_name });
+  },
+  login(email, password) {
+    return this.post('/auth/login', { email, password });
+  },
+  forgotPassword(email) {
+    return this.post('/auth/forgot-password', { email });
+  },
+  logout(token) {
+    return this.post('/auth/logout', {});
+  },
+  me(token) {
+    return this.get('/auth/me', token);
   },
 };
 
@@ -778,26 +796,27 @@ const SESSION = {
 };
 
 /* ── UI HELPERS ── */
-function showAlert(id, msg, type = 'error') {
-  const el = document.getElementById(id);
+function showAlert(id, msg, type) {
+  type = type || 'error';
+  var el = document.getElementById(id);
   if (!el) return;
   el.textContent = msg;
-  el.className = `alert alert-${type} show`;
+  el.className = 'alert alert-' + type + ' show';
 }
 function hideAlert(id) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (el) el.className = 'alert';
 }
 function setLoading(btnId, loading, text) {
-  const btn = document.getElementById(btnId);
+  var btn = document.getElementById(btnId);
   if (!btn) return;
   btn.disabled = loading;
-  btn.innerHTML = loading ? `<span class="spinner"></span>${text}` : text;
+  btn.innerHTML = loading ? '<span class="spinner"></span>' + text : text;
 }
 
 /* ── TABS ── */
 function showTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-tab').forEach(function(t) { t.classList.remove('active'); });
   document.querySelectorAll('.auth-tab')[tab === 'login' ? 0 : 1].classList.add('active');
   document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
   document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
@@ -815,28 +834,40 @@ function showLogin() {
 }
 
 /* ── PLAN SELECTOR ── */
-let selectedPlan = 'starter';
+var selectedPlan = 'starter';
 function selectPlan(el, plan) {
-  document.querySelectorAll('.plan-option').forEach(p => p.classList.remove('selected'));
+  document.querySelectorAll('.plan-option').forEach(function(p) { p.classList.remove('selected'); });
   el.classList.add('selected');
   selectedPlan = plan;
 }
 
+/* ── PASSWORD VISIBILITY TOGGLE ── */
+function togglePw(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = '&#9675;';
+  } else {
+    input.type = 'password';
+    btn.innerHTML = '&#9673;';
+  }
+}
+
 /* ── PASSWORD STRENGTH ── */
 function checkPasswordStrength(pw) {
-  const strength = document.getElementById('pwStrength');
-  const bars = [1,2,3,4].map(i => document.getElementById('pwBar'+i));
-  const label = document.getElementById('pwLabel');
+  var strength = document.getElementById('pwStrength');
+  var bars = [1,2,3,4].map(function(i) { return document.getElementById('pwBar'+i); });
+  var label = document.getElementById('pwLabel');
   if (!pw) { strength.classList.remove('show'); return; }
   strength.classList.add('show');
-  let score = 0;
+  var score = 0;
   if (pw.length >= 8) score++;
   if (/[A-Z]/.test(pw)) score++;
   if (/[0-9]/.test(pw)) score++;
   if (/[^A-Za-z0-9]/.test(pw)) score++;
-  const colors = ['#ef4444','#f59e0b','#0099ff','#00e5b4'];
-  const labels = ['Too weak','Fair','Good','Strong'];
-  bars.forEach((b, i) => { b.style.background = i < score ? colors[score-1] : 'var(--bg-overlay)'; });
+  var colors = ['#ef4444','#f59e0b','#0099ff','#00e5b4'];
+  var labels = ['Too weak','Fair','Good','Strong'];
+  bars.forEach(function(b, i) { b.style.background = i < score ? colors[score-1] : 'var(--bg-overlay)'; });
   label.textContent = labels[score-1] || 'Enter a password';
   label.style.color = score > 0 ? colors[score-1] : 'var(--text-muted)';
 }
@@ -844,18 +875,18 @@ function checkPasswordStrength(pw) {
 /* ── LOGIN ── */
 async function handleLogin() {
   hideAlert('loginError'); hideAlert('loginSuccess');
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
+  var email = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPassword').value;
   if (!email || !password) { showAlert('loginError', 'Please enter your email and password.'); return; }
   setLoading('loginBtn', true, 'Signing in...');
   try {
-    const data = await API.login(email, password);
+    var data = await API.login(email, password);
     if (data.success) {
       SESSION.save(data.token, data.user);
-      showAlert('loginSuccess', '✓ Signed in successfully! Redirecting...', 'success');
-      setTimeout(() => { window.location.href = '/'; }, 1200);
+      showAlert('loginSuccess', 'Signed in successfully! Redirecting...', 'success');
+      setTimeout(function() { window.location.href = '/'; }, 1000);
     } else {
-      showAlert('loginError', data.error || 'Invalid email or password. Please try again.');
+      showAlert('loginError', data.error || 'Invalid email or password.');
     }
   } catch (err) {
     showAlert('loginError', 'Connection error. Please check your internet and try again.');
@@ -866,18 +897,18 @@ async function handleLogin() {
 /* ── REGISTER ── */
 async function handleRegister() {
   hideAlert('registerError');
-  const first = document.getElementById('regFirst').value.trim();
-  const last = document.getElementById('regLast').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const password = document.getElementById('regPassword').value;
-  const terms = document.getElementById('termsCheck').checked;
+  var first = document.getElementById('regFirst').value.trim();
+  var last = document.getElementById('regLast').value.trim();
+  var email = document.getElementById('regEmail').value.trim();
+  var password = document.getElementById('regPassword').value;
+  var terms = document.getElementById('termsCheck').checked;
   if (!first || !last) { showAlert('registerError', 'Please enter your first and last name.'); return; }
   if (!email) { showAlert('registerError', 'Please enter your email address.'); return; }
   if (!password || password.length < 8) { showAlert('registerError', 'Password must be at least 8 characters.'); return; }
   if (!terms) { showAlert('registerError', 'Please agree to the Terms of Service to continue.'); return; }
   setLoading('registerBtn', true, 'Creating account...');
   try {
-    const data = await API.register(email, password, `${first} ${last}`);
+    var data = await API.register(email, password, first + ' ' + last);
     if (data.success) {
       document.getElementById('registerFields').style.display = 'none';
       document.getElementById('registerSuccess').classList.add('show');
@@ -893,13 +924,13 @@ async function handleRegister() {
 /* ── FORGOT PASSWORD ── */
 async function handleForgot() {
   hideAlert('forgotError'); hideAlert('forgotSuccess');
-  const email = document.getElementById('forgotEmail').value.trim();
+  var email = document.getElementById('forgotEmail').value.trim();
   if (!email) { showAlert('forgotError', 'Please enter your email address.'); return; }
   setLoading('forgotBtn', true, 'Sending...');
   try {
-    const data = await API.forgotPassword(email);
+    var data = await API.forgotPassword(email);
     if (data.success) {
-      showAlert('forgotSuccess', '✓ Reset link sent! Check your inbox.', 'success');
+      showAlert('forgotSuccess', 'Reset link sent! Check your inbox.', 'success');
     } else {
       showAlert('forgotError', data.error || 'Failed to send reset link.');
     }
@@ -911,29 +942,40 @@ async function handleForgot() {
 
 /* ── GOOGLE LOGIN (placeholder) ── */
 function handleGoogleLogin() {
-  showAlert('loginError', 'Google OAuth coming soon! Please use email and password for now.');
+  showAlert('loginError', 'Google OAuth coming soon! Use email and password for now.');
 }
 
 /* ── TICKER ── */
-const tickerData = [
+var tickerData = [
   {l:'US IMPORTS',v:'$3.14T YTD',c:'+8.2%',up:true},
   {l:'US EXPORTS',v:'$2.89T YTD',c:'+6.4%',up:true},
   {l:'FBX FREIGHT INDEX',v:'$2,840',c:'-4.2%',up:false},
   {l:'ACTIVE VESSELS',v:'5,842',c:'+1.2%',up:true},
-  {l:'VN→US IMPORTS',v:'$98.4B YTD',c:'+28.7%',up:true},
-  {l:'MX→US IMPORTS',v:'$186B YTD',c:'+22.1%',up:true},
+  {l:'VN\u2192US IMPORTS',v:'$98.4B YTD',c:'+28.7%',up:true},
+  {l:'MX\u2192US IMPORTS',v:'$186B YTD',c:'+22.1%',up:true},
   {l:'CONTAINER RATE',v:'$1,920/FEU',c:'-8.4%',up:false},
   {l:'IXIntel AGENTS',v:'5/5 LIVE',c:'100%',up:true},
 ];
-const track = document.getElementById('tickerTrack');
-const html = tickerData.map(i => `<div class="ticker-item"><span class="ticker-label">${i.l}</span><span class="ticker-val">${i.v}</span><span class="${i.up?'ticker-up':'ticker-dn'}">${i.c}</span></div>`).join('');
-track.innerHTML = html + html;
+var track = document.getElementById('tickerTrack');
+var tickerHtml = tickerData.map(function(i) {
+  return '<div class="ticker-item"><span class="ticker-label">' + i.l + '</span><span class="ticker-val">' + i.v + '</span><span class="' + (i.up ? 'ticker-up' : 'ticker-dn') + '">' + i.c + '</span></div>';
+}).join('');
+track.innerHTML = tickerHtml + tickerHtml;
 
-/* ── CHECK IF ALREADY LOGGED IN ── */
-const session = SESSION.get();
-if (session.token && window.location.pathname === '/login.html') {
-  window.location.href = '/';
-}
+/* ── VALIDATE EXISTING SESSION ON LOAD ── */
+(async function() {
+  var session = SESSION.get();
+  if (session.token) {
+    try {
+      var data = await API.me(session.token);
+      if (data.success) {
+        window.location.href = '/';
+        return;
+      }
+    } catch (e) { /* token invalid or server down — stay on login */ }
+    SESSION.clear();
+  }
+})();
 </script>
 </body>
 </html>
