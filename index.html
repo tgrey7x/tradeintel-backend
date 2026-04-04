@@ -315,6 +315,10 @@ input, select, textarea { font-family: var(--font-sans); }
 .ticker-label { color: var(--text-muted); }
 #tickerWB .ticker-label { color: #fb923c; }
 #tickerCensus .ticker-label { color: var(--blue); }
+a.ticker-source-label { text-decoration: none; cursor: pointer; }
+a.ticker-source-label:hover { filter: brightness(1.25); }
+a.ticker-item { text-decoration: none; cursor: pointer; }
+a.ticker-item:hover { background: rgba(255,255,255,0.04); }
 .ticker-value { color: var(--text-primary); }
 .ticker-change.up { color: var(--accent); }
 .ticker-change.dn { color: var(--red); }
@@ -1191,13 +1195,13 @@ tr:hover td { background: rgba(255,255,255,0.015); }
 
   <!-- ═══ TICKERS ═══ -->
   <div class="ticker-row">
-    <div class="ticker-source-label wb">World Bank · 2024</div>
+    <a class="ticker-source-label wb" href="https://wits.worldbank.org/trade/country-byhs6product/en/country/ALL/year/2024/tradeflow/Export/partner/WLD/product/Total" target="_blank" rel="noopener">World Bank · 2024</a>
     <div class="ticker-viewport">
       <div class="ticker-track" id="tickerWB"></div>
     </div>
   </div>
   <div class="ticker-row">
-    <div class="ticker-source-label census">US Census · <span id="censusPeriodLabel">Monthly</span></div>
+    <a class="ticker-source-label census" href="https://usatrade.census.gov" target="_blank" rel="noopener">US Census · <span id="censusPeriodLabel">Monthly</span></a>
     <div class="ticker-viewport">
       <div class="ticker-track census-track" id="tickerCensus"></div>
     </div>
@@ -2232,14 +2236,36 @@ const UI = {
     const elCensus = document.getElementById('tickerCensus');
     if (!elWB || !elCensus) return;
 
-    const itemHTML = (items) => {
-      const html = items.map(i =>
-        `<div class="ticker-item">` +
-        `<span class="ticker-label">${i.l}</span>` +
-        `<span class="ticker-value">${i.v}</span>` +
-        (i.c ? `<span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span>` : '') +
-        `</div>`
-      ).join('');
+    const WB_BASE_URL = 'https://data.worldbank.org/indicator/TX.VAL.MRCH.CD.WT';
+    const CENSUS_BASE_URL = 'https://usatrade.census.gov';
+
+    // Map WB ticker label country prefix to World Bank country code
+    const WB_COUNTRY_CODES = {
+      'BR':'BRA','CA':'CAN','CN':'CHN','DE':'DEU','GB':'GBR',
+      'IN':'IND','JP':'JPN','KR':'KOR','MX':'MEX','SG':'SGP',
+      'US':'USA','VN':'VNM',
+    };
+
+    const itemHTML = (items, source) => {
+      const html = items.map(i => {
+        let href = '#';
+        if (source === 'worldbank') {
+          const prefix = i.l.split(' ')[0];
+          const iso = WB_COUNTRY_CODES[prefix];
+          const isExport = i.l.includes('EXP');
+          const indicator = isExport ? 'TX.VAL.MRCH.CD.WT' : 'TM.VAL.MRCH.CD.WT';
+          href = iso
+            ? `${WB_BASE_URL.replace('TX.VAL.MRCH.CD.WT', indicator)}?locations=${iso}`
+            : WB_BASE_URL;
+        } else if (source === 'census') {
+          href = CENSUS_BASE_URL;
+        }
+        return `<a class="ticker-item" href="${href}" target="_blank" rel="noopener">` +
+          `<span class="ticker-label">${i.l}</span>` +
+          `<span class="ticker-value">${i.v}</span>` +
+          (i.c ? `<span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span>` : '') +
+          `</a>`;
+      }).join('');
       return html + html; // duplicate for seamless loop
     };
 
@@ -2272,8 +2298,8 @@ const UI = {
       {l:'US EXP · REFINED OIL',v:'$7.9B', c:'-9.8% YoY',  up:false},
     ];
 
-    elWB.innerHTML     = itemHTML(WB_STATIC);
-    elCensus.innerHTML = itemHTML(CENSUS_STATIC);
+    elWB.innerHTML     = itemHTML(WB_STATIC, 'worldbank');
+    elCensus.innerHTML = itemHTML(CENSUS_STATIC, 'census');
 
     // Attempt live upgrade with 10s timeout
     try {
@@ -2285,10 +2311,10 @@ const UI = {
       if (!data.success) throw new Error('api error');
 
       if (data.wbTicker?.length) {
-        elWB.innerHTML = itemHTML(data.wbTicker);
+        elWB.innerHTML = itemHTML(data.wbTicker, 'worldbank');
       }
       if (data.censusTicker?.length) {
-        elCensus.innerHTML = itemHTML(data.censusTicker);
+        elCensus.innerHTML = itemHTML(data.censusTicker, 'census');
         // Update the period label
         const lbl = document.getElementById('censusPeriodLabel');
         if (lbl && data.census_month) lbl.textContent = data.census_month;
