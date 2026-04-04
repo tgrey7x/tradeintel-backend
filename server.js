@@ -55,6 +55,18 @@ const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
 
 const WB_COUNTRIES = "US;CN;DE;JP;IN;MX;CA;KR;GB;BR;VNM;SGP";
 const WB_BASE = "https://api.worldbank.org/v2";
+const CENSUS_BASE = "https://api.census.gov/data/timeseries/intltrade";
+
+// Census HS4 commodities to track [code, label]
+const CENSUS_IMP_HS = [
+  ["8471","COMPUTERS"],["8517","TELECOM"],["8703","VEHICLES"],
+  ["2709","PETROLEUM"],["8542","SEMICON"],["8528","DISPLAYS"],
+  ["6110","APPAREL"],["9401","FURNITURE"],
+];
+const CENSUS_EXP_HS = [
+  ["8802","AIRCRAFT"],["8703","VEHICLES"],["8471","COMPUTERS"],
+  ["8517","TELECOM"],["2710","REFINED OIL"],["8542","SEMICON"],
+];
 
 async function fetchWB(indicator, countries, mrv = 1) {
   const url = `${WB_BASE}/country/${countries}/indicator/${indicator}?format=json&mrv=${mrv}&per_page=50`;
@@ -62,6 +74,79 @@ async function fetchWB(indicator, countries, mrv = 1) {
   if (!res.ok) throw new Error(`World Bank API error: ${res.status}`);
   const json = await res.json();
   return json[1] || [];
+}
+
+async function fetchCensusHS(type, hs, month) {
+  const ep = type === "imp" ? "imports" : "exports";
+  const valField = type === "imp" ? "GEN_VAL_MO" : "ALL_VAL_MO";
+  const commField = type === "imp" ? "I_COMMODITY" : "E_COMMODITY";
+  const url = `${CENSUS_BASE}/${ep}/hs?get=${valField},CTY_NAME&${commField}=${hs}&COMM_LVL=HS4&time=${month}`;
+  const res = await fetch(url);
+  if (res.status !== 200) return null;
+  const json = await res.json();
+  return parseInt(json[1]?.[0]) || null;
+}
+
+// Find the latest month Census has data for (checks last 6 months)
+async function findLatestCensusMonth() {
+  const now = new Date();
+  for (let i = 2; i <= 8; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const val = await fetchCensusHS("imp", "8471", m);
+    if (val) return m;
+  }
+  return null;
+}
+
+// Build Census ticker items with YoY comparison
+async function buildCensusTicker() {
+  const curMonth = await findLatestCensusMonth();
+  if (!curMonth) return { items: [], month: null };
+
+  // Prior year same month for YoY
+  const [y, mo] = curMonth.split("-");
+  const prevMonth = `${parseInt(y) - 1}-${mo}`;
+
+  const items = [];
+
+  // US Imports by commodity
+  for (const [hs, label] of CENSUS_IMP_HS) {
+    const [cur, prev] = await Promise.all([
+      fetchCensusHS("imp", hs, curMonth),
+      fetchCensusHS("imp", hs, prevMonth),
+    ]);
+    if (!cur) continue;
+    const pct = prev ? ((cur - prev) / prev) * 100 : null;
+    items.push({
+      l: `US IMP · ${label}`,
+      v: fmtBillion(cur),
+      c: pct !== null ? `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}% YoY` : "",
+      up: pct === null ? true : pct >= 0,
+      source: "census",
+      period: curMonth,
+    });
+  }
+
+  // US Exports by commodity
+  for (const [hs, label] of CENSUS_EXP_HS) {
+    const [cur, prev] = await Promise.all([
+      fetchCensusHS("exp", hs, curMonth),
+      fetchCensusHS("exp", hs, prevMonth),
+    ]);
+    if (!cur) continue;
+    const pct = prev ? ((cur - prev) / prev) * 100 : null;
+    items.push({
+      l: `US EXP · ${label}`,
+      v: fmtBillion(cur),
+      c: pct !== null ? `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}% YoY` : "",
+      up: pct === null ? true : pct >= 0,
+      source: "census",
+      period: curMonth,
+    });
+  }
+
+  return { items, month: curMonth };
 }
 
 app.get("/api/trade-data", async (req, res) => {
@@ -144,7 +229,32 @@ app.get("/api/trade-data", async (req, res) => {
         };
       });
 
-      TRADE_CACHE.data = { ticker, countries, source: "World Bank", cached_at: new Date().toISOString() };
+      // Census Bureau monthly data (most recent available month, ~2 month lag)
+      const census = await buildCensusTicker();
+
+      // Merge: WB annual items get source tag, Census items already tagged
+      const wbTicker = ticker.map(t => ({ ...t, source: "worldbank" }));
+
+      // Separator item between data sets
+      const separator = census.month ? [{
+        l: "━━━━━━━━━━",
+        v: "",
+        c: "",
+        up: true,
+        source: "separator",
+        period: null,
+      }] : [];
+
+      TRADE_CACHE.data = {
+        ticker: [...wbTicker, ...separator, ...census.items],
+        wbTicker,
+        censusTicker: census.items,
+        countries,
+        source: "World Bank + US Census Bureau",
+        wb_year: "2024",
+        census_month: census.month,
+        cached_at: new Date().toISOString(),
+      };
       TRADE_CACHE.ts = now;
     }
 
