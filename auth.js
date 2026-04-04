@@ -216,4 +216,31 @@ router.get('/admin/stats', async (req, res) => {
   }
 });
 
+// Suspend / unsuspend user (admin only)
+router.put('/admin/users/:userId/suspend', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    const { data: { user } } = await supabaseAdmin.auth.getUser(token);
+    const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).single();
+    if (!['admin', 'super_admin'].includes(profile?.role)) {
+      return res.status(403).json({ success: false, error: 'Admin access required' });
+    }
+    if (req.params.userId === user.id) {
+      return res.status(400).json({ success: false, error: 'Cannot suspend your own account' });
+    }
+    const { suspend } = req.body;
+    const plan_status = suspend ? 'suspended' : 'active';
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .update({ plan_status, updated_at: new Date().toISOString() })
+      .eq('id', req.params.userId);
+    if (error) throw error;
+    res.json({ success: true, message: suspend ? 'Account suspended.' : 'Account restored.' });
+  } catch (error) {
+    console.error('Suspend error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
