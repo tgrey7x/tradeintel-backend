@@ -12,7 +12,7 @@
 
 ## Current Phase
 
-Phase 1B Sprint — Login UI, Admin Console, Stripe, Real Data APIs
+Phase 1B Sprint — Login UI, Admin Console, Stripe, Real Data APIs, Simple Mode
 
 ## Tech Stack
 
@@ -44,8 +44,15 @@ Phase 1B Sprint — Login UI, Admin Console, Stripe, Real Data APIs
 
 ## Priority Build Order (Phase 1B)
 
-1. Login / Register UI connected to auth.js
-2. Admin Console with RBAC
-3. Stripe payments + subscription gating
-4. Real trade data APIs (USATrade, UN Comtrade, CBP)
-5. Simple Mode AI search + brand swap + custom domain
+1. Login / Register UI connected to auth.js — ✅ DONE
+2. Admin Console with RBAC — ✅ DONE
+3. Stripe payments + subscription gating — OPEN
+4. Real trade data APIs (USATrade, UN Comtrade, CBP) — IN PROGRESS
+5. Simple Mode AI search + brand swap + custom domain — OPEN
+
+## Sync Protocol
+
+- CLAUDE.md is the single source of truth for ALL Claude sessions on this project
+- Any Claude session that completes a milestone MUST update this file before closing
+- Any Claude session that starts new work MUST mark it IN PROGRESS here
+- Check this file at conversation start — if status doesn't match reality, update it first
