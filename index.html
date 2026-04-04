@@ -2198,13 +2198,24 @@ const UI = {
       const data = await res.json();
       if (!data.success || !data.ticker?.length) throw new Error('empty');
 
-      // Append static platform items after live trade data
-      const live = data.ticker;
-      const extra = [
-        {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
-        {l:'DATA SOURCE',v:'World Bank',c:'LIVE',up:true},
-      ];
-      renderItems([...live, ...extra]);
+      // Build items with source badges
+      const items = data.ticker
+        .filter(t => t.source !== 'separator')
+        .map(t => {
+          let badge = '';
+          if (t.source === 'worldbank') badge = ` <span style="color:var(--text-muted);font-size:9px;">WB ${data.wb_year}</span>`;
+          if (t.source === 'census')    badge = ` <span style="color:var(--blue);font-size:9px;">CENSUS ${data.census_month}</span>`;
+          return { ...t, badge };
+        });
+
+      const html = items.map(i =>
+        `<div class="ticker-item">` +
+        `<span class="ticker-label">${i.l}${i.badge||''}</span>` +
+        `<span class="ticker-value">${i.v}</span>` +
+        (i.c ? `<span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span>` : '') +
+        `</div>`
+      ).join('');
+      el.innerHTML = html + html;
     } catch (e) {
       // Fallback to static data if API unreachable
       const items = [
@@ -2218,7 +2229,8 @@ const UI = {
         {l:'KR EXPORTS',v:'$742B',c:'+6.7%',up:true},
         {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
       ];
-      renderItems(items);
+      const html = items.map(i => `<div class="ticker-item"><span class="ticker-label">${i.l}</span><span class="ticker-value">${i.v}</span><span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span></div>`).join('');
+      el.innerHTML = html + html;
     }
   },
   
