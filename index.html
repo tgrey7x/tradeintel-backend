@@ -255,20 +255,55 @@ input, select, textarea { font-family: var(--font-sans); }
 /* ═══════════════════════════════════════════════════════════════
    TICKER STRIP
 ═══════════════════════════════════════════════════════════════ */
-.ticker-strip {
+.ticker-row {
   height: 26px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-soft);
   overflow: hidden;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   font-family: var(--font-mono);
   font-size: 10px;
+}
+.ticker-row + .ticker-row {
+  border-top: 1px solid var(--border-soft);
+}
+.ticker-source-label {
+  flex-shrink: 0;
+  width: 148px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-right: 1px solid var(--border-strong);
+  justify-content: center;
+}
+.ticker-source-label.wb {
+  color: #fb923c;
+  background: rgba(251,146,60,0.05);
+}
+.ticker-source-label.census {
+  color: var(--blue);
+  background: rgba(0,153,255,0.05);
+}
+.ticker-viewport {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 .ticker-track {
   display: flex;
   animation: ticker-scroll 60s linear infinite;
   white-space: nowrap;
+}
+.ticker-track.census-track {
+  animation-duration: 50s;
+  animation-direction: normal;
 }
 .ticker-item {
   display: flex;
@@ -282,9 +317,11 @@ input, select, textarea { font-family: var(--font-sans); }
 .ticker-change.up { color: var(--accent); }
 .ticker-change.dn { color: var(--red); }
 @keyframes ticker-scroll {
-  0% { transform: translateX(0); }
+  0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+/* legacy class kept for safety */
+.ticker-strip { display: none; }
 
 /* ═══════════════════════════════════════════════════════════════
    SIDEBAR NAVIGATION
@@ -1150,9 +1187,18 @@ tr:hover td { background: rgba(255,255,255,0.015); }
     </div>
   </header>
 
-  <!-- ═══ TICKER ═══ -->
-  <div class="ticker-strip">
-    <div class="ticker-track" id="tickerTrack"></div>
+  <!-- ═══ TICKERS ═══ -->
+  <div class="ticker-row">
+    <div class="ticker-source-label wb">World Bank · 2024</div>
+    <div class="ticker-viewport">
+      <div class="ticker-track" id="tickerWB"></div>
+    </div>
+  </div>
+  <div class="ticker-row">
+    <div class="ticker-source-label census">US Census · <span id="censusPeriodLabel">Monthly</span></div>
+    <div class="ticker-viewport">
+      <div class="ticker-track census-track" id="tickerCensus"></div>
+    </div>
   </div>
 
   <!-- ═══ BODY ═══ -->
@@ -2180,55 +2226,71 @@ document.addEventListener('DOMContentLoaded', async () => {
 ═══════════════════════════════════════════════════════════════ */
 const UI = {
   async buildTicker() {
-    const el = document.getElementById('tickerTrack');
-    if (!el) return;
+    const elWB     = document.getElementById('tickerWB');
+    const elCensus = document.getElementById('tickerCensus');
+    if (!elWB || !elCensus) return;
 
-    const STATIC_ITEMS = [
-      {l:'US IMPORTS',v:'$4.10T',c:'+6.6%',up:true},
-      {l:'US EXPORTS',v:'$3.19T',c:'+4.6%',up:true},
-      {l:'CN EXPORTS',v:'$3.58T',c:'+5.8%',up:true},
-      {l:'CN IMPORTS',v:'$2.58T',c:'+1.1%',up:true},
-      {l:'DE EXPORTS',v:'$1.68T',c:'-1.2%',up:false},
-      {l:'JP EXPORTS',v:'$707B',c:'-1.4%',up:false},
-      {l:'MX EXPORTS',v:'$617B',c:'+4.1%',up:true},
-      {l:'KR EXPORTS',v:'$684B',c:'+8.1%',up:true},
-      {l:'VN EXPORTS',v:'$405B',c:'+14.4%',up:true},
-      {l:'IN EXPORTS',v:'$443B',c:'+2.6%',up:true},
-      {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
-    ];
-
-    const renderItems = (items) => {
+    const itemHTML = (items) => {
       const html = items.map(i =>
         `<div class="ticker-item">` +
-        `<span class="ticker-label">${i.l}${i.badge ? ' '+i.badge : ''}</span>` +
+        `<span class="ticker-label">${i.l}</span>` +
         `<span class="ticker-value">${i.v}</span>` +
         (i.c ? `<span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span>` : '') +
         `</div>`
       ).join('');
-      el.innerHTML = html + html;
+      return html + html; // duplicate for seamless loop
     };
 
-    // Show static data immediately so ticker is always visible
-    renderItems(STATIC_ITEMS);
+    // Static fallback data — shown immediately and replaced when live loads
+    const WB_STATIC = [
+      {l:'US EXPORTS',v:'$2.07T',c:'+2.3%',up:true},
+      {l:'US IMPORTS',v:'$3.36T',c:'+6.0%',up:true},
+      {l:'CN EXPORTS',v:'$3.58T',c:'+5.8%',up:true},
+      {l:'CN IMPORTS',v:'$2.58T',c:'+1.1%',up:true},
+      {l:'DE EXPORTS',v:'$1.68T',c:'-1.2%',up:false},
+      {l:'JP EXPORTS',v:'$707B', c:'-1.4%',up:false},
+      {l:'MX EXPORTS',v:'$617B', c:'+4.1%',up:true},
+      {l:'KR EXPORTS',v:'$684B', c:'+8.1%',up:true},
+      {l:'VN EXPORTS',v:'$405B', c:'+14.4%',up:true},
+      {l:'IN EXPORTS',v:'$443B', c:'+2.6%',up:true},
+      {l:'GB EXPORTS',v:'$513B', c:'-2.4%',up:false},
+      {l:'SG EXPORTS',v:'$506B', c:'+6.2%',up:true},
+    ];
+    const CENSUS_STATIC = [
+      {l:'US IMP · COMPUTERS',  v:'$28.2B',c:'+129.1% YoY',up:true},
+      {l:'US IMP · TELECOM',    v:'$11.2B',c:'+10.3% YoY', up:true},
+      {l:'US IMP · VEHICLES',   v:'$11.5B',c:'-23.7% YoY', up:false},
+      {l:'US IMP · PETROLEUM',  v:'$10.2B',c:'-11.3% YoY', up:false},
+      {l:'US IMP · SEMICON',    v:'$3.2B', c:'+35.3% YoY', up:true},
+      {l:'US IMP · DISPLAYS',   v:'$1.4B', c:'+4.7% YoY',  up:true},
+      {l:'US EXP · AIRCRAFT',   v:'$148M', c:'-1.5% YoY',  up:false},
+      {l:'US EXP · VEHICLES',   v:'$4.5B', c:'-2.7% YoY',  up:false},
+      {l:'US EXP · COMPUTERS',  v:'$3.4B', c:'+25.3% YoY', up:true},
+      {l:'US EXP · SEMICON',    v:'$3.9B', c:'+23.4% YoY', up:true},
+      {l:'US EXP · REFINED OIL',v:'$7.9B', c:'-9.8% YoY',  up:false},
+    ];
 
-    // Then attempt live fetch with 10s timeout — update in place if successful
+    elWB.innerHTML     = itemHTML(WB_STATIC);
+    elCensus.innerHTML = itemHTML(CENSUS_STATIC);
+
+    // Attempt live upgrade with 10s timeout
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
       const res = await fetch(`${CONFIG.BACKEND_URL}/api/trade-data`, { signal: controller.signal });
       clearTimeout(timeout);
       const data = await res.json();
-      if (!data.success || !data.ticker?.length) throw new Error('empty');
+      if (!data.success) throw new Error('api error');
 
-      const items = data.ticker
-        .filter(t => t.source !== 'separator')
-        .map(t => {
-          let badge = '';
-          if (t.source === 'worldbank') badge = `<span style="color:var(--text-muted);font-size:9px;">WB ${data.wb_year}</span>`;
-          if (t.source === 'census')    badge = `<span style="color:var(--blue);font-size:9px;">CENSUS ${data.census_month}</span>`;
-          return { ...t, badge };
-        });
-      renderItems(items);
+      if (data.wbTicker?.length) {
+        elWB.innerHTML = itemHTML(data.wbTicker);
+      }
+      if (data.censusTicker?.length) {
+        elCensus.innerHTML = itemHTML(data.censusTicker);
+        // Update the period label
+        const lbl = document.getElementById('censusPeriodLabel');
+        if (lbl && data.census_month) lbl.textContent = data.census_month;
+      }
     } catch (e) {
       // Static data already showing — nothing to do
     }
