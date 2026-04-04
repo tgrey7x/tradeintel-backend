@@ -2183,54 +2183,54 @@ const UI = {
     const el = document.getElementById('tickerTrack');
     if (!el) return;
 
-    // Fallback static items shown while live data loads
-    const fallback = [
-      {l:'LOADING LIVE DATA',v:'…',c:'',up:true},
+    const STATIC_ITEMS = [
+      {l:'US IMPORTS',v:'$4.10T',c:'+6.6%',up:true},
+      {l:'US EXPORTS',v:'$3.19T',c:'+4.6%',up:true},
+      {l:'CN EXPORTS',v:'$3.58T',c:'+5.8%',up:true},
+      {l:'CN IMPORTS',v:'$2.58T',c:'+1.1%',up:true},
+      {l:'DE EXPORTS',v:'$1.68T',c:'-1.2%',up:false},
+      {l:'JP EXPORTS',v:'$707B',c:'-1.4%',up:false},
+      {l:'MX EXPORTS',v:'$617B',c:'+4.1%',up:true},
+      {l:'KR EXPORTS',v:'$684B',c:'+8.1%',up:true},
+      {l:'VN EXPORTS',v:'$405B',c:'+14.4%',up:true},
+      {l:'IN EXPORTS',v:'$443B',c:'+2.6%',up:true},
+      {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
     ];
-    const renderItems = items => {
-      const html = items.map(i => `<div class="ticker-item"><span class="ticker-label">${i.l}</span><span class="ticker-value">${i.v}</span>${i.c ? `<span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span>` : ''}</div>`).join('');
-      el.innerHTML = html + html;
-    };
-    renderItems(fallback);
 
-    try {
-      const res = await fetch(`${CONFIG.BACKEND_URL}/api/trade-data`);
-      const data = await res.json();
-      if (!data.success || !data.ticker?.length) throw new Error('empty');
-
-      // Build items with source badges
-      const items = data.ticker
-        .filter(t => t.source !== 'separator')
-        .map(t => {
-          let badge = '';
-          if (t.source === 'worldbank') badge = ` <span style="color:var(--text-muted);font-size:9px;">WB ${data.wb_year}</span>`;
-          if (t.source === 'census')    badge = ` <span style="color:var(--blue);font-size:9px;">CENSUS ${data.census_month}</span>`;
-          return { ...t, badge };
-        });
-
+    const renderItems = (items) => {
       const html = items.map(i =>
         `<div class="ticker-item">` +
-        `<span class="ticker-label">${i.l}${i.badge||''}</span>` +
+        `<span class="ticker-label">${i.l}${i.badge ? ' '+i.badge : ''}</span>` +
         `<span class="ticker-value">${i.v}</span>` +
         (i.c ? `<span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span>` : '') +
         `</div>`
       ).join('');
       el.innerHTML = html + html;
+    };
+
+    // Show static data immediately so ticker is always visible
+    renderItems(STATIC_ITEMS);
+
+    // Then attempt live fetch with 10s timeout — update in place if successful
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(`${CONFIG.BACKEND_URL}/api/trade-data`, { signal: controller.signal });
+      clearTimeout(timeout);
+      const data = await res.json();
+      if (!data.success || !data.ticker?.length) throw new Error('empty');
+
+      const items = data.ticker
+        .filter(t => t.source !== 'separator')
+        .map(t => {
+          let badge = '';
+          if (t.source === 'worldbank') badge = `<span style="color:var(--text-muted);font-size:9px;">WB ${data.wb_year}</span>`;
+          if (t.source === 'census')    badge = `<span style="color:var(--blue);font-size:9px;">CENSUS ${data.census_month}</span>`;
+          return { ...t, badge };
+        });
+      renderItems(items);
     } catch (e) {
-      // Fallback to static data if API unreachable
-      const items = [
-        {l:'US IMPORTS',v:'$4.10T',c:'+6.6%',up:true},
-        {l:'US EXPORTS',v:'$3.19T',c:'+4.6%',up:true},
-        {l:'CN EXPORTS',v:'$3.58T',c:'+5.3%',up:true},
-        {l:'CN IMPORTS',v:'$2.58T',c:'+3.8%',up:true},
-        {l:'DE EXPORTS',v:'$1.94T',c:'+2.1%',up:true},
-        {l:'JP EXPORTS',v:'$917B',c:'-1.2%',up:false},
-        {l:'MX EXPORTS',v:'$569B',c:'+8.4%',up:true},
-        {l:'KR EXPORTS',v:'$742B',c:'+6.7%',up:true},
-        {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
-      ];
-      const html = items.map(i => `<div class="ticker-item"><span class="ticker-label">${i.l}</span><span class="ticker-value">${i.v}</span><span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span></div>`).join('');
-      el.innerHTML = html + html;
+      // Static data already showing — nothing to do
     }
   },
   
