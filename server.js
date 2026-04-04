@@ -45,6 +45,137 @@ app.get("/admin", (req, res) => {
   res.sendFile(__dirname + "/admin.html");
 });
 
+// ── TRADE DATA ROUTE ──
+// World Bank API — no key required
+// GET /api/trade-data?country=US&flow=both&year=2024
+const TRADE_CACHE = { data: null, ts: 0 };
+const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
+
+const WB_COUNTRIES = "US;CN;DE;JP;IN;MX;CA;KR;GB;BR;VNM;SGP";
+const WB_BASE = "https://api.worldbank.org/v2";
+
+async function fetchWB(indicator, countries, mrv = 1) {
+  const url = `${WB_BASE}/country/${countries}/indicator/${indicator}?format=json&mrv=${mrv}&per_page=50`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`World Bank API error: ${res.status}`);
+  const json = await res.json();
+  return json[1] || [];
+}
+
+app.get("/api/trade-data", async (req, res) => {
+  try {
+    const { country, flow, year } = req.query;
+    const now = Date.now();
+
+    // Refresh cache every 6 hours
+    if (!TRADE_CACHE.data || now - TRADE_CACHE.ts > CACHE_TTL) {
+      // mrv=3 gives current + 2 prior years — 2 calls to stay under rate limit
+      const exportsHistRaw = await fetchWB("TX.VAL.MRCH.CD.WT", WB_COUNTRIES, 3);
+      const importsHistRaw = await fetchWB("TM.VAL.MRCH.CD.WT", WB_COUNTRIES, 3);
+
+      // Build per-country lookup
+      const byCountry = {};
+      const addRow = (rows, key) => {
+        rows.forEach(r => {
+          if (!r.value) return;
+          const id = r.country.id;
+          if (!byCountry[id]) byCountry[id] = { id, name: r.country.value };
+          if (!byCountry[id][key]) byCountry[id][key] = {};
+          byCountry[id][key][r.date] = r.value;
+        });
+      };
+      addRow(exportsHistRaw, "exports");
+      addRow(importsHistRaw, "imports");
+
+      // Build ticker items from latest data
+      const ticker = [];
+      Object.values(byCountry).forEach(c => {
+        const expYears = Object.keys(c.exports || {}).sort().reverse();
+        const impYears = Object.keys(c.imports || {}).sort().reverse();
+        if (expYears.length >= 2) {
+          const cur = c.exports[expYears[0]];
+          const prev = c.exports[expYears[1]];
+          const pct = prev ? ((cur - prev) / prev) * 100 : 0;
+          ticker.push({
+            l: `${c.id} EXPORTS`,
+            v: fmtBillion(cur),
+            c: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`,
+            up: pct >= 0,
+            year: expYears[0],
+          });
+        }
+        if (impYears.length >= 2) {
+          const cur = c.imports[impYears[0]];
+          const prev = c.imports[impYears[1]];
+          const pct = prev ? ((cur - prev) / prev) * 100 : 0;
+          ticker.push({
+            l: `${c.id} IMPORTS`,
+            v: fmtBillion(cur),
+            c: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`,
+            up: pct >= 0,
+            year: impYears[0],
+          });
+        }
+      });
+
+      // Full country dataset
+      const countries = Object.values(byCountry).map(c => {
+        const expYears = Object.keys(c.exports || {}).sort().reverse();
+        const impYears = Object.keys(c.imports || {}).sort().reverse();
+        const latestExport = expYears[0] ? c.exports[expYears[0]] : null;
+        const latestImport = impYears[0] ? c.imports[impYears[0]] : null;
+        const prevExport = expYears[1] ? c.exports[expYears[1]] : null;
+        const prevImport = impYears[1] ? c.imports[impYears[1]] : null;
+        return {
+          id: c.id,
+          name: c.name,
+          exports: latestExport,
+          imports: latestImport,
+          exports_yoy: prevExport ? ((latestExport - prevExport) / prevExport) * 100 : null,
+          imports_yoy: prevImport ? ((latestImport - prevImport) / prevImport) * 100 : null,
+          trade_balance: latestExport && latestImport ? latestExport - latestImport : null,
+          year: expYears[0] || impYears[0],
+          history: {
+            exports: c.exports || {},
+            imports: c.imports || {},
+          },
+        };
+      });
+
+      TRADE_CACHE.data = { ticker, countries, source: "World Bank", cached_at: new Date().toISOString() };
+      TRADE_CACHE.ts = now;
+    }
+
+    let result = TRADE_CACHE.data;
+
+    // Filter by country if requested
+    if (country) {
+      const code = country.toUpperCase();
+      const filtered = result.countries.filter(c => c.id === code || c.name.toLowerCase().includes(country.toLowerCase()));
+      result = { ...result, countries: filtered };
+    }
+
+    // Filter by flow
+    if (flow === "exports") {
+      result = { ...result, ticker: result.ticker.filter(t => t.l.includes("EXPORTS")) };
+    } else if (flow === "imports") {
+      result = { ...result, ticker: result.ticker.filter(t => t.l.includes("IMPORTS")) };
+    }
+
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error("Trade data error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+function fmtBillion(v) {
+  if (!v) return "N/A";
+  if (v >= 1e12) return `$${(v / 1e12).toFixed(2)}T`;
+  if (v >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
+  return `$${(v / 1e6).toFixed(0)}M`;
+}
+
 // ── AGENT ROUTE ──
 app.post("/api/agent", async (req, res) => {
   try {

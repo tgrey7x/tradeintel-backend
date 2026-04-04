@@ -2179,25 +2179,47 @@ document.addEventListener('DOMContentLoaded', async () => {
    UI BUILDERS
 ═══════════════════════════════════════════════════════════════ */
 const UI = {
-  buildTicker() {
+  async buildTicker() {
     const el = document.getElementById('tickerTrack');
     if (!el) return;
-    const items = [
-      {l:'US IMPORTS',v:'$3.14T YTD',c:'+8.2%',up:true},
-      {l:'US EXPORTS',v:'$2.89T YTD',c:'+6.4%',up:true},
-      {l:'TRANSPACIFIC TEU',v:'18.4M',c:'+12.1%',up:true},
-      {l:'FBX FREIGHT INDEX',v:'$2,840',c:'-4.2%',up:false},
-      {l:'CN→US IMPORTS',v:'$542B YTD',c:'-2.8%',up:false},
-      {l:'VN→US IMPORTS',v:'$98.4B YTD',c:'+28.7%',up:true},
-      {l:'MX→US IMPORTS',v:'$186B YTD',c:'+22.1%',up:true},
-      {l:'CONTAINER RATE',v:'$1,920/FEU',c:'-8.4%',up:false},
-      {l:'ACTIVE VESSELS',v:'5,842',c:'+1.2%',up:true},
-      {l:'PORT THROUGHPUT',v:'46.8M TEU',c:'+9.3%',up:true},
-      {l:'PLATFORM USERS',v:'12,847',c:'+18.4%',up:true},
-      {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
+
+    // Fallback static items shown while live data loads
+    const fallback = [
+      {l:'LOADING LIVE DATA',v:'…',c:'',up:true},
     ];
-    const html = items.map(i => `<div class="ticker-item"><span class="ticker-label">${i.l}</span><span class="ticker-value">${i.v}</span><span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span></div>`).join('');
-    el.innerHTML = html + html;
+    const renderItems = items => {
+      const html = items.map(i => `<div class="ticker-item"><span class="ticker-label">${i.l}</span><span class="ticker-value">${i.v}</span>${i.c ? `<span class="ticker-change ${i.up?'up':'dn'}">${i.c}</span>` : ''}</div>`).join('');
+      el.innerHTML = html + html;
+    };
+    renderItems(fallback);
+
+    try {
+      const res = await fetch(`${CONFIG.BACKEND_URL}/api/trade-data`);
+      const data = await res.json();
+      if (!data.success || !data.ticker?.length) throw new Error('empty');
+
+      // Append static platform items after live trade data
+      const live = data.ticker;
+      const extra = [
+        {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
+        {l:'DATA SOURCE',v:'World Bank',c:'LIVE',up:true},
+      ];
+      renderItems([...live, ...extra]);
+    } catch (e) {
+      // Fallback to static data if API unreachable
+      const items = [
+        {l:'US IMPORTS',v:'$4.10T',c:'+6.6%',up:true},
+        {l:'US EXPORTS',v:'$3.19T',c:'+4.6%',up:true},
+        {l:'CN EXPORTS',v:'$3.58T',c:'+5.3%',up:true},
+        {l:'CN IMPORTS',v:'$2.58T',c:'+3.8%',up:true},
+        {l:'DE EXPORTS',v:'$1.94T',c:'+2.1%',up:true},
+        {l:'JP EXPORTS',v:'$917B',c:'-1.2%',up:false},
+        {l:'MX EXPORTS',v:'$569B',c:'+8.4%',up:true},
+        {l:'KR EXPORTS',v:'$742B',c:'+6.7%',up:true},
+        {l:'AI AGENTS',v:'5/5 LIVE',c:'100%',up:true},
+      ];
+      renderItems(items);
+    }
   },
   
   buildShipmentTable() {
