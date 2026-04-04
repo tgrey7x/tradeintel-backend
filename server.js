@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const { startBot, sendAlert } = require("./telegram");
 const authRoutes = require("./auth");
@@ -31,18 +32,19 @@ app.use("/auth", authRoutes);
 app.get("/test", (req, res) =>
   res.json({ success: true, message: "Routes working!" }),
 );
-app.use(express.static(__dirname, { index: false }));
+const ROOT = path.resolve(__dirname);
+app.use(express.static(ROOT, { index: false }));
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.sendFile("index.html", { root: ROOT });
 });
 
 app.get("/login", (req, res) => {
-  res.sendFile(__dirname + "/login.html");
+  res.sendFile("login.html", { root: ROOT });
 });
 
 app.get("/admin", (req, res) => {
-  res.sendFile(__dirname + "/admin.html");
+  res.sendFile("admin.html", { root: ROOT });
 });
 
 // ── TRADE DATA ROUTE ──
