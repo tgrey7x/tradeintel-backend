@@ -108,15 +108,21 @@ async function buildCensusTicker() {
   const [y, mo] = curMonth.split("-");
   const prevMonth = `${parseInt(y) - 1}-${mo}`;
 
+  // Fire all commodity fetches in parallel
+  const [impResults, expResults] = await Promise.all([
+    Promise.all(CENSUS_IMP_HS.map(([hs]) =>
+      Promise.all([fetchCensusHS("imp", hs, curMonth), fetchCensusHS("imp", hs, prevMonth)])
+    )),
+    Promise.all(CENSUS_EXP_HS.map(([hs]) =>
+      Promise.all([fetchCensusHS("exp", hs, curMonth), fetchCensusHS("exp", hs, prevMonth)])
+    )),
+  ]);
+
   const items = [];
 
-  // US Imports by commodity
-  for (const [hs, label] of CENSUS_IMP_HS) {
-    const [cur, prev] = await Promise.all([
-      fetchCensusHS("imp", hs, curMonth),
-      fetchCensusHS("imp", hs, prevMonth),
-    ]);
-    if (!cur) continue;
+  CENSUS_IMP_HS.forEach(([, label], i) => {
+    const [cur, prev] = impResults[i];
+    if (!cur) return;
     const pct = prev ? ((cur - prev) / prev) * 100 : null;
     items.push({
       l: `US IMP · ${label}`,
@@ -126,15 +132,11 @@ async function buildCensusTicker() {
       source: "census",
       period: curMonth,
     });
-  }
+  });
 
-  // US Exports by commodity
-  for (const [hs, label] of CENSUS_EXP_HS) {
-    const [cur, prev] = await Promise.all([
-      fetchCensusHS("exp", hs, curMonth),
-      fetchCensusHS("exp", hs, prevMonth),
-    ]);
-    if (!cur) continue;
+  CENSUS_EXP_HS.forEach(([, label], i) => {
+    const [cur, prev] = expResults[i];
+    if (!cur) return;
     const pct = prev ? ((cur - prev) / prev) * 100 : null;
     items.push({
       l: `US EXP · ${label}`,
@@ -144,7 +146,7 @@ async function buildCensusTicker() {
       source: "census",
       period: curMonth,
     });
-  }
+  });
 
   return { items, month: curMonth };
 }
@@ -359,4 +361,10 @@ app.listen(PORT, () => {
   `);
 });
 startBot();
+
+// Pre-warm trade data cache so first browser request is instant
+fetch(`http://localhost:${PORT}/api/trade-data`)
+  .then(() => console.log("  Trade data cache warmed."))
+  .catch(() => {});
+
 module.exports = app;
