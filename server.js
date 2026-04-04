@@ -12,7 +12,9 @@ const app = express();
 
 // ── SECURITY MIDDLEWARE ──
 app.set("trust proxy", 1);
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // inline scripts in HTML pages require this
+}));
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
