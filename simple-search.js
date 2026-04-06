@@ -81,6 +81,28 @@ async function parseQuery(query) {
   }
 }
 
+// ── ROUTE: health check (no token cost) ──
+// GET /api/simple-search/health
+// Verifies the module is loaded and the SDK + API key are configured.
+// Does NOT call Claude — so it's free to hit from the browser or curl.
+router.get('/api/simple-search/health', (req, res) => {
+  const hasKey = !!process.env.ANTHROPIC_API_KEY;
+  let sdkOk = false;
+  try { require.resolve('@anthropic-ai/sdk'); sdkOk = true; } catch (_) {}
+  res.json({
+    success: true,
+    module: 'simple-search',
+    status: hasKey && sdkOk ? 'ready' : 'not-ready',
+    checks: {
+      anthropic_api_key: hasKey ? 'set' : 'missing',
+      anthropic_sdk:     sdkOk  ? 'installed' : 'missing',
+    },
+    model_fast: MODELS.fast,
+    model_deep: MODELS.deep,
+    brand: req.brand?.slug || 'ixintel',
+  });
+});
+
 // ── ROUTE ──
 // POST /api/simple-search  { query: string }
 router.post('/api/simple-search', async (req, res) => {

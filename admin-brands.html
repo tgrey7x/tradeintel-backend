@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brands — IXIntel Admin</title>
+<style>
+  :root {
+    --brand-primary: #00ff9f;
+    --brand-accent:  #00b8ff;
+    --bg:            #0a0e14;
+    --panel:         #11161f;
+    --panel-2:       #0d1219;
+    --text:          #e5e7eb;
+    --muted:         #7a8599;
+    --border:        #1e2530;
+    --danger:        #f87171;
+    --ok:            #34d399;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .topbar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar .crumbs { color: var(--muted); font-size: 13px; }
+  .topbar .crumbs a { color: var(--muted); text-decoration: none; }
+  .topbar .crumbs a:hover { color: var(--brand-primary); }
+  .topbar .who { font-size: 12px; color: var(--muted); }
+  h1 { font-size: 20px; margin: 0; letter-spacing: -0.3px; }
+  h1 .dot { color: var(--brand-primary); }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card h2 {
+    margin: 0 0 14px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--brand-accent);
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+  input[type="text"], input[type="email"], input[type="color"], textarea {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+  }
+  input[type="color"] { height: 38px; padding: 2px; }
+  input:focus, textarea:focus { border-color: var(--brand-accent); }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  button {
+    background: var(--brand-primary);
+    color: #000;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 14px;
+    letter-spacing: 0.3px;
+  }
+  button.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  button.danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 10px 8px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+  tr:hover { background: var(--panel-2); cursor: pointer; }
+  tr.selected { background: rgba(0,255,159,0.08); }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .badge.default { background: rgba(0,255,159,0.12); color: var(--brand-primary); border-color: rgba(0,255,159,0.3); }
+  .msg {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 12px;
+  }
+  .msg.ok    { background: rgba(52,211,153,0.1);  color: var(--ok);     border: 1px solid rgba(52,211,153,0.3); }
+  .msg.err   { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.3); }
+  .domains {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .domain-row {
+    padding: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .domain-row .host { font-weight: 600; font-size: 13px; }
+  .domain-row .status-ok  { color: var(--ok); }
+  .domain-row .status-pending { color: var(--muted); }
+  .domain-row .token { font-family: ui-monospace, monospace; font-size: 10px; word-break: break-all; color: var(--muted); margin-top: 4px; }
+  .empty { text-align: center; padding: 24px; color: var(--muted); font-size: 12px; }
+  .login-required {
+    max-width: 420px; margin: 80px auto; text-align: center;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 32px;
+  }
+  .login-required a { color: var(--brand-primary); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1><span class="dot">◈</span> <span id="brand-label">IXIntel</span> Admin — Brands</h1>
+    <div class="crumbs"><a href="/admin">← Back to Admin Console</a></div>
+  </div>
+  <div class="who" id="who">—</div>
+</div>
+
+<div class="wrap" id="main" style="display:none;">
+
+  <div class="grid">
+
+    <!-- LEFT: Create / Edit brand -->
+    <div class="card">
+      <h2 id="form-title">Create Brand</h2>
+      <div id="form-msg"></div>
+      <input type="hidden" id="b-id" value="">
+
+      <label>Slug (unique, lowercase, no spaces)</label>
+      <input type="text" id="b-slug" placeholder="acme-trade">
+
+      <label>Display Name</label>
+      <input type="text" id="b-name" placeholder="Acme Trade">
+
+      <label>Tagline</label>
+      <input type="text" id="b-tagline" placeholder="Global Trade Intelligence for Acme">
+
+      <label>Logo URL</label>
+      <input type="text" id="b-logo" placeholder="https://...">
+
+      <label>Support Email</label>
+      <input type="email" id="b-email" placeholder="support@acme.com">
+
+      <div class="row">
+        <div>
+          <label>Primary Color</label>
+          <input type="color" id="b-primary" value="#00ff9f">
+        </div>
+        <div>
+          <label>Accent Color</label>
+          <input type="color" id="b-accent" value="#00b8ff">
+        </div>
+      </div>
+
+      <button id="b-save">Save Brand</button>
+      <button class="secondary" id="b-reset">New</button>
+
+      <!-- Custom domains panel (only visible when editing) -->
+      <div class="domains" id="domains-panel" style="display:none;">
+        <h2>Custom Domains</h2>
+        <div id="domains-list"></div>
+        <label>Add Domain</label>
+        <div class="row">
+          <input type="text" id="d-host" placeholder="trade.acme.com">
+          <button id="d-add" style="margin-top:0;flex:0 0 auto;">Add</button>
+        </div>
+        <div id="d-msg"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Brand list -->
+    <div class="card">
+      <h2>All Brands</h2>
+      <div id="list-msg"></div>
+      <table id="brands-table">
+        <thead><tr><th>Slug</th><th>Name</th><th>Status</th><th>Created</th></tr></thead>
+        <tbody id="brands-tbody"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div id="login-gate" class="login-required" style="display:none;">
+  <h2 style="margin-top:0;">Admin access required</h2>
+  <p style="color:var(--muted);font-size:13px;">Please <a href="/login">log in</a> as an admin to manage brands.</p>
+</div>
+
+<script>
+  // ════════════════════════════════════════════════════════════════
+  // admin-brands frontend module — Phase 1B Task #5
+  // Modular per CLAUDE.md rule: this page is fully standalone and
+  // does not share any code or CSS with admin.html. It uses the
+  // existing /auth/me endpoint for auth gating and the /auth/admin/brands*
+  // endpoints exposed by brands.js.
+  // ════════════════════════════════════════════════════════════════
+
+  const TOKEN = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+  const el = (id) => document.getElementById(id);
+  const msg = (node, kind, text) => { node.innerHTML = text ? '<div class="msg ' + kind + '">' + text + '</div>' : ''; };
+
+  // ── HTTP helper ──
+  async function api(method, url, body) {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(TOKEN ? { Authorization: 'Bearer ' + TOKEN } : {})
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || json.success === false) {
+      throw new Error(json.error || ('HTTP ' + res.status));
+    }
+    return json;
+  }
+
+  // ── Auth gate ──
+  async function bootstrap() {
+    if (!TOKEN) return showGate();
+    try {
+      const me = await api('GET', '/auth/me');
+      if (!['admin', 'super_admin'].includes(me.user?.role)) return showGate();
+      el('who').textContent = me.user.email + ' · ' + me.user.role;
+      el('main').style.display = '';
+      await loadBrandHeader();
+      await loadBrands();
+    } catch (err) {
+      showGate();
+    }
+  }
+
+  function showGate() {
+    el('login-gate').style.display = '';
+    el('main').style.display = 'none';
+  }
+
+  async function loadBrandHeader() {
+    try {
+      const j = await fetch('/api/brand').then(r => r.json());
+      if (j.brand) {
+        el('brand-label').textContent = j.brand.name || 'IXIntel';
+        if (j.brand.primary_color) document.documentElement.style.setProperty('--brand-primary', j.brand.primary_color);
+        if (j.brand.accent_color)  document.documentElement.style.setProperty('--brand-accent',  j.brand.accent_color);
+      }
+    } catch (_) {}
+  }
+
+  // ── Brand list ──
+  let brands = [];
+  let selectedId = null;
+
+  async function loadBrands() {
+    try {
+      const j = await api('GET', '/auth/admin/brands');
+      brands = j.brands || [];
+      renderBrands();
+    } catch (err) {
+      msg(el('list-msg'), 'err', err.message);
+      el('brands-tbody').innerHTML = '<tr><td colspan="4" class="empty">Could not load brands.<br><br>Has <code>migrations/001_brands.sql</code> been run in Supabase?</td></tr>';
+    }
+  }
+
+  function renderBrands() {
+    const tb = el('brands-tbody');
+    if (!brands.length) {
+      tb.innerHTML = '<tr><td colspan="4" class="empty">No brands yet. Create one on the left.</td></tr>';
+      return;
+    }
+    tb.innerHTML = brands.map(b => (
+      '<tr data-id="' + b.id + '" class="' + (b.id === selectedId ? 'selected' : '') + '">' +
+        '<td><code>' + escapeHtml(b.slug) + '</code></td>' +
+        '<td>' + escapeHtml(b.name) + '</td>' +
+        '<td>' + (b.is_default ? '<span class="badge default">default</span>' : '<span class="badge">tenant</span>') + '</td>' +
+        '<td>' + new Date(b.created_at).toLocaleDateString() + '</td>' +
+      '</tr>'
+    )).join('');
+    tb.querySelectorAll('tr').forEach(tr => {
+      tr.addEventListener('click', () => selectBrand(tr.dataset.id));
+    });
+  }
+
+  function selectBrand(id) {
+    const b = brands.find(x => x.id === id);
+    if (!b) return;
+    selectedId = id;
+    el('form-title').textContent = 'Edit Brand';
+    el('b-id').value = b.id;
+    el('b-slug').value = b.slug;
+    el('b-slug').disabled = true;
+    el('b-name').value = b.name || '';
+    el('b-tagline').value = b.tagline || '';
+    el('b-logo').value = b.logo_url || '';
+    el('b-email').value = b.support_email || '';
+    el('b-primary').value = b.primary_color || '#00ff9f';
+    el('b-accent').value = b.accent_color || '#00b8ff';
+    el('domains-panel').style.display = '';
+    renderBrands();
+    loadDomains(id);
+  }
+
+  // ── Save brand ──
+  el('b-save').addEventListener('click', async () => {
+    const id = el('b-id').value;
+    const payload = {
+      slug:         el('b-slug').value.trim(),
+      name:         el('b-name').value.trim(),
+      tagline:      el('b-tagline').value.trim(),
+      logo_url:     el('b-logo').value.trim(),
+      support_email: el('b-email').value.trim(),
+      primary_color: el('b-primary').value,
+      accent_color:  el('b-accent').value,
+    };
+    try {
+      if (id) {
+        delete payload.slug; // not editable on update
+        await api('PUT', '/auth/admin/brands/' + id, payload);
+        msg(el('form-msg'), 'ok', 'Brand updated.');
+      } else {
+        if (!payload.slug || !payload.name) throw new Error('Slug and Name required');
+        const j = await api('POST', '/auth/admin/brands', payload);
+        msg(el('form-msg'), 'ok', 'Brand created.');
+        selectedId = j.brand.id;
+      }
+      await loadBrands();
+      if (selectedId) selectBrand(selectedId);
+    } catch (err) {
+      msg(el('form-msg'), 'err', err.message);
+    }
+  });
+
+  el('b-reset').addEventListener('click', () => {
+    selectedId = null;
+    el('form-title').textContent = 'Create Brand';
+    ['b-id','b-slug','b-name','b-tagline','b-logo','b-email'].forEach(id => el(id).value = '');
+    el('b-slug').disabled = false;
+    el('b-primary').value = '#00ff9f';
+    el('b-accent').value  = '#00b8ff';
+    el('domains-panel').style.display = 'none';
+    msg(el('form-msg'), '', '');
+    renderBrands();
+  });
+
+  // ── Domains ──
+  async function loadDomains(brandId) {
+    try {
+      const j = await api('GET', '/auth/admin/brands/' + brandId + '/domains');
+      const list = el('domains-list');
+      if (!j.domains.length) {
+        list.innerHTML = '<div class="empty">No custom domains yet.</div>';
+        return;
+      }
+      list.innerHTML = j.domains.map(d => (
+        '<div class="domain-row">' +
+          '<div class="host">' + escapeHtml(d.hostname) + '</div>' +
+          '<div class="' + (d.verified ? 'status-ok' : 'status-pending') + '">' +
+            (d.verified ? '✓ verified · SSL ' + escapeHtml(d.ssl_status) : 'pending verification') +
+          '</div>' +
+          (!d.verified ? '<div class="token">TXT _ixintel-verify.' + escapeHtml(d.hostname) + ' = ' + escapeHtml(d.verification_token) + '</div>' +
+            '<button class="secondary" style="margin-top:8px;font-size:10px;padding:6px 10px;" onclick="verifyDomain(\'' + brandId + '\',\'' + d.id + '\')">Verify now</button>' : '') +
+        '</div>'
+      )).join('');
+    } catch (err) {
+      msg(el('d-msg'), 'err', err.message);
+    }
+  }
+
+  el('d-add').addEventListener('click', async () => {
+    if (!selectedId) return;
+    const host = el('d-host').value.trim();
+    if (!host) return;
+    try {
+      await api('POST', '/auth/admin/brands/' + selectedId + '/domains', { hostname: host });
+      el('d-host').value = '';
+      msg(el('d-msg'), 'ok', 'Domain added. Publish the TXT record, then click Verify.');
+      loadDomains(selectedId);
+    } catch (err) {
+      msg(el('d-msg'), 'err', err.message);
+    }
+  });
+
+  window.verifyDomain = async (brandId, domainId) => {
+    try {
+      await api('POST', '/auth/admin/brands/' + brandId + '/domains/' + domainId + '/verify');
+      msg(el('d-msg'), 'ok', 'Domain verified!');
+      loadDomains(brandId);
+    } catch (err) {
+      msg(el('d-msg'), 'err', err.message);
+    }
+  };
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  bootstrap();
+</script>
+</body>
+</html>

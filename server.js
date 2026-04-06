@@ -65,6 +65,11 @@ app.get("/simple", (req, res) => {
   res.sendFile("simple.html", { root: ROOT });
 });
 
+// Task #5 — Admin Brands UI (isolated page, does not touch admin.html)
+app.get("/admin/brands", (req, res) => {
+  res.sendFile("admin-brands.html", { root: ROOT });
+});
+
 // ── TRADE DATA ROUTE ──
 // World Bank API — no key required
 // GET /api/trade-data?country=US&flow=both&year=2024
