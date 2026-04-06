@@ -3,6 +3,9 @@ const path = require("path");
 const express = require("express");
 const { startBot, sendAlert } = require("./telegram");
 const authRoutes = require("./auth");
+// ── PHASE 1B TASK #5 MODULES (each self-contained, plug-and-play) ──
+const brands = require("./brands");
+const simpleSearch = require("./simple-search");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -29,8 +32,16 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// ── BRAND MIDDLEWARE ──
+// Attaches req.brand to every request based on Host header. Degrades to
+// the default brand if the brands table hasn't been migrated yet.
+app.use(brands.hostMiddleware);
+
 // ── ROUTES ──
 app.use("/auth", authRoutes);
+// Task #5 modules — mounted at root so each owns its own URL prefix.
+app.use(brands.router);
+app.use(simpleSearch.router);
 app.get("/test", (req, res) =>
   res.json({ success: true, message: "Routes working!" }),
 );
@@ -47,6 +58,11 @@ app.get("/login", (req, res) => {
 
 app.get("/admin", (req, res) => {
   res.sendFile("admin.html", { root: ROOT });
+});
+
+// Task #5 — Simple Mode UI (isolated page, does not touch index.html)
+app.get("/simple", (req, res) => {
+  res.sendFile("simple.html", { root: ROOT });
 });
 
 // ── TRADE DATA ROUTE ──

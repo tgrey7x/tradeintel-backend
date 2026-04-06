@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simple Search — IXIntel</title>
+<meta name="description" content="Natural-language trade intelligence search — powered by Claude.">
+<style>
+  :root {
+    --brand-primary: #00ff9f;
+    --brand-accent:  #00b8ff;
+    --bg:            #0a0e14;
+    --panel:         #11161f;
+    --text:          #e5e7eb;
+    --muted:         #7a8599;
+    --border:        #1e2530;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .brand-logo .dot { color: var(--brand-primary); }
+  .tagline {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 8px;
+  }
+  .mode-switch {
+    margin-top: 20px;
+    display: inline-flex;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    font-size: 13px;
+  }
+  .mode-switch a {
+    padding: 6px 16px;
+    border-radius: 999px;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .mode-switch a.active {
+    background: var(--brand-primary);
+    color: #000;
+    font-weight: 600;
+  }
+  .search-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .search-box textarea {
+    width: 100%;
+    min-height: 80px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 17px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .search-box textarea::placeholder { color: var(--muted); }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+  }
+  .hint { color: var(--muted); font-size: 12px; }
+  button.search {
+    background: var(--brand-primary);
+    color: #000;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button.search:disabled { opacity: 0.5; cursor: default; }
+  .examples {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .example {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 12px 16px;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .example:hover { border-color: var(--brand-accent); color: var(--text); }
+  .results {
+    margin-top: 32px;
+    display: none;
+  }
+  .results.show { display: block; }
+  .result-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+  }
+  .result-card h3 { margin: 0 0 6px 0; font-size: 15px; }
+  .result-card p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+  .result-card .meta { font-size: 11px; color: var(--brand-accent); margin-top: 8px; }
+  .loading {
+    text-align: center;
+    color: var(--muted);
+    padding: 24px;
+    font-size: 13px;
+  }
+  .error {
+    background: #2a0f14;
+    border: 1px solid #5a1f2a;
+    color: #f87171;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+  footer {
+    text-align: center;
+    margin-top: 64px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand-logo">
+        <span class="dot">●</span>
+        <span id="brand-name">IXIntel</span>
+      </div>
+      <div class="tagline" id="brand-tagline">Global Trade Intelligence</div>
+      <div class="mode-switch">
+        <a href="/">Terminal</a>
+        <a href="/simple" class="active">Simple</a>
+      </div>
+    </header>
+
+    <div class="search-box">
+      <textarea id="q" placeholder="Ask anything about global trade — e.g. Who are the top US importers of Colombian coffee?"></textarea>
+      <div class="row">
+        <div class="hint">Press Ctrl+Enter to search · Powered by Claude</div>
+        <button class="search" id="go">Search</button>
+      </div>
+    </div>
+
+    <div class="examples" id="examples">
+      <button class="example">Who exports semiconductors from Taiwan to the US?</button>
+      <button class="example">Top 5 countries importing Brazilian soybeans in 2025</button>
+      <button class="example">Compare US vehicle imports vs exports year over year</button>
+      <button class="example">Which HS codes cover lithium batteries?</button>
+    </div>
+
+    <div class="results" id="results"></div>
+
+    <footer>
+      <span id="brand-footer">IXIntel</span> · Simple Mode (beta) · <a href="/" style="color: var(--muted);">Switch to Terminal</a>
+    </footer>
+  </div>
+
+<script>
+  // ── Theme from /api/brand ──
+  fetch('/api/brand').then(r => r.json()).then(({ brand }) => {
+    if (!brand) return;
+    document.getElementById('brand-name').textContent = brand.name || 'IXIntel';
+    document.getElementById('brand-tagline').textContent = brand.tagline || '';
+    document.getElementById('brand-footer').textContent = brand.name || 'IXIntel';
+    document.title = 'Simple Search — ' + (brand.name || 'IXIntel');
+    if (brand.primary_color) document.documentElement.style.setProperty('--brand-primary', brand.primary_color);
+    if (brand.accent_color)  document.documentElement.style.setProperty('--brand-accent',  brand.accent_color);
+  }).catch(() => { /* stay on defaults */ });
+
+  // ── Search ──
+  const $q       = document.getElementById('q');
+  const $go      = document.getElementById('go');
+  const $results = document.getElementById('results');
+  const $examples = document.getElementById('examples');
+
+  $examples.querySelectorAll('.example').forEach(btn => {
+    btn.addEventListener('click', () => { $q.value = btn.textContent; $q.focus(); });
+  });
+
+  $q.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) runSearch();
+  });
+  $go.addEventListener('click', runSearch);
+
+  async function runSearch() {
+    const query = $q.value.trim();
+    if (!query) return;
+    $go.disabled = true;
+    $results.classList.add('show');
+    $results.innerHTML = '<div class="loading">Thinking…</div>';
+    try {
+      const res = await fetch('/api/simple-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Search failed');
+      renderResults(json);
+    } catch (err) {
+      $results.innerHTML = '<div class="error">' + escapeHtml(err.message) + '</div>';
+    } finally {
+      $go.disabled = false;
+    }
+  }
+
+  function renderResults(json) {
+    const parts = [];
+    if (json.answer) {
+      parts.push('<div class="result-card"><h3>Answer</h3><p>' + escapeHtml(json.answer).replace(/\n/g, '<br>') + '</p></div>');
+    }
+    if (Array.isArray(json.sources)) {
+      json.sources.forEach(s => {
+        parts.push(
+          '<div class="result-card"><h3>' + escapeHtml(s.label || 'Source') + '</h3>' +
+          (s.detail ? '<p>' + escapeHtml(s.detail) + '</p>' : '') +
+          (s.meta ? '<div class="meta">' + escapeHtml(s.meta) + '</div>' : '') +
+          '</div>'
+        );
+      });
+    }
+    $results.innerHTML = parts.join('') || '<div class="loading">No results.</div>';
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+</script>
+</body>
+</html>
