@@ -16,6 +16,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const { supabaseAdmin } = require('./db');
+const { normalizeHost, isValidHostname } = require('./lib/normalize-host');
 
 const router = express.Router();
 
@@ -89,7 +90,8 @@ async function getDefaultBrand() {
 // 3. Otherwise return the default brand
 async function resolveBrandForHost(rawHost) {
   if (!rawHost) return getDefaultBrand();
-  const host = String(rawHost).split(':')[0].replace(/\.$/, '').toLowerCase();
+  const host = normalizeHost(rawHost);
+  if (!host) return getDefaultBrand();
 
   const cached = cacheGet(host);
   if (cached) return cached;
@@ -257,8 +259,8 @@ router.get('/auth/admin/brands/:brandId/domains', async (req, res) => {
 router.post('/auth/admin/brands/:brandId/domains', async (req, res) => {
   if (!(await requireAdmin(req, res))) return;
   try {
-    const hostname = String(req.body.hostname || '').toLowerCase().replace(/\.$/, '').trim();
-    if (!hostname || !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(hostname)) {
+    const hostname = normalizeHost(req.body.hostname);
+    if (!isValidHostname(hostname)) {
       return res.status(400).json({ success: false, error: 'Invalid hostname' });
     }
     const verification_token = 'ixintel-verify-' + crypto.randomBytes(16).toString('hex');

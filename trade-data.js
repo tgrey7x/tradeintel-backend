@@ -13,6 +13,7 @@
 // ════════════════════════════════════════════════════════════════
 
 const express = require('express');
+const { fmtBillion } = require('./lib/fmt-billion');
 const router = express.Router();
 
 // ── PRIVATE CACHE ──
@@ -34,14 +35,6 @@ const CENSUS_EXP_HS = [
   ['8802','AIRCRAFT'],['8703','VEHICLES'],['8471','COMPUTERS'],
   ['8517','TELECOM'],['2710','REFINED OIL'],['8542','SEMICON'],
 ];
-
-// ── FORMAT HELPER (exported, reused by simple-search.js) ──
-function fmtBillion(v) {
-  if (!v) return 'N/A';
-  if (v >= 1e12) return `$${(v / 1e12).toFixed(2)}T`;
-  if (v >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
-  return `$${(v / 1e6).toFixed(0)}M`;
-}
 
 // ── WORLD BANK FETCH ──
 async function fetchWB(indicator, countries, mrv = 1) {

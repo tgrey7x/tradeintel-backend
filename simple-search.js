@@ -13,6 +13,7 @@
 // ════════════════════════════════════════════════════════════════
 
 const express = require('express');
+const { safeJsonParse } = require('./lib/clean-json');
 const router = express.Router();
 
 // ── CONFIG ──
@@ -61,24 +62,16 @@ async function parseQuery(query) {
     messages: [{ role: 'user', content: query }],
   });
   const text = response.content?.[0]?.text || '{}';
-
-  // Defensive JSON parse — if Claude wraps the response in fences, strip them.
-  const cleaned = text
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```\s*$/i, '')
-    .trim();
-
-  try {
-    const parsed = JSON.parse(cleaned);
+  const result = safeJsonParse(text);
+  if (result.ok) {
     return {
-      answer: String(parsed.answer || '').slice(0, 2000),
-      sources: Array.isArray(parsed.sources) ? parsed.sources.slice(0, 6) : [],
+      answer: String(result.value.answer || '').slice(0, 2000),
+      sources: Array.isArray(result.value.sources) ? result.value.sources.slice(0, 6) : [],
       model: MODELS.fast,
     };
-  } catch (_err) {
-    // Fallback: return raw text as the answer so the user still sees something.
-    return { answer: text.slice(0, 2000), sources: [], model: MODELS.fast };
   }
+  // Fallback: return raw text as the answer so the user still sees something.
+  return { answer: String(text).slice(0, 2000), sources: [], model: MODELS.fast };
 }
 
 // ── ROUTE: health check (no token cost) ──
