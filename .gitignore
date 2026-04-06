@@ -1,3 +1,7 @@
 node_modules
 .env
-.claude/
+# .claude/ is mostly local-only, but the project settings file is committed.
+# Directory must be unignored first so git descends into it; then re-ignore
+# everything inside except settings.json.
+.claude/*
+!.claude/settings.json

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "════════════════════════════════════════════════════════════════  TONY'S AUTONOMOUS-MODE CONFIG — tradeintel-backend  ════════════════════════════════════════════════════════════════  Every future Claude Code session on this project MUST respect  this file. It defines:    • ALLOW — routine safe ops that auto-approve (no phone prompts)    • DENY  — dangerous ops that are blocked outright    • ASK   — medium-risk ops that fire a phone notification    • HOOKS — automatic syntax-checking of JS on edit + before commit  Crown-jewel files (index.html, admin.html, login.html) are protected  by the deny list. Edits to them require the user to temporarily move  them off the deny list — intentional friction.  Production-writing surfaces (Stripe / Cloudflare / Supabase / Railway  mutating API calls, npm install, master pushes) all prompt.  See CLAUDE.md -> Permanent Rules -> Modular architecture for context.  ════════════════════════════════════════════════════════════════",
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff)",
+      "Bash(git diff:*)",
+      "Bash(git log)",
+      "Bash(git log:*)",
+      "Bash(git branch)",
+      "Bash(git branch:*)",
+      "Bash(git fetch)",
+      "Bash(git fetch:*)",
+      "Bash(git pull)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)",
+      "Bash(git remote:*)",
+      "Bash(git show:*)",
+      "Bash(git push origin claude/:*)",
+      "Bash(git push -u origin claude/:*)",
+      "Bash(node --check:*)",
+      "Bash(node -e:*)",
+      "Bash(npm test)",
+      "Bash(npm run test)",
+      "Bash(npm run test:*)",
+      "Bash(mkdir -p:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(jq:*)",
+      "Bash(echo:*)"
+    ],
+    "deny": [
+      "Edit(./index.html)",
+      "Edit(./admin.html)",
+      "Edit(./login.html)",
+      "Edit(/home/user/tradeintel-backend/index.html)",
+      "Edit(/home/user/tradeintel-backend/admin.html)",
+      "Edit(/home/user/tradeintel-backend/login.html)",
+      "Write(./index.html)",
+      "Write(./admin.html)",
+      "Write(./login.html)",
+      "Write(/home/user/tradeintel-backend/index.html)",
+      "Write(/home/user/tradeintel-backend/admin.html)",
+      "Write(/home/user/tradeintel-backend/login.html)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push origin master:*)",
+      "Bash(git push origin main:*)",
+      "Bash(git push master:*)",
+      "Bash(git push main:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git branch -D:*)",
+      "Bash(git tag -d:*)",
+      "Bash(rm -rf:*)",
+      "Bash(rm -fr:*)"
+    ],
+    "ask": [
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(yarn add:*)",
+      "Bash(pnpm add:*)",
+      "Bash(curl:*api.stripe.com:*)",
+      "Bash(curl:*api.cloudflare.com:*)",
+      "Bash(curl:*railway.app:*)",
+      "Bash(curl:*supabase.co:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git cherry-pick:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // .tool_response.filePath // \"\"'); case \"$f\" in *.js) node --check \"$f\" 2>&1 || echo \"[hook] SYNTAX ERROR in $f\" >&2 ;; esac; exit 0",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(jq -r '.tool_input.command // \"\"'); case \"$cmd\" in \"git commit\"*|*\" git commit\"*) cd /home/user/tradeintel-backend && files=$(git diff --cached --name-only --diff-filter=ACM -- '*.js' 2>/dev/null); for f in $files; do node --check \"$f\" || { echo \"[pre-commit hook] syntax error in $f — blocking commit\" >&2; exit 2; }; done ;; esac; exit 0",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+  "attribution": {
+    "commit": "https://claude.ai/code/session_01JZpfEAHoWPjm6hTE2wLvcy"
+  }
+}
