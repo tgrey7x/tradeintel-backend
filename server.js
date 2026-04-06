@@ -24,10 +24,11 @@ const rateLimit = require("express-rate-limit");
 // the feature is completely removed. Order = middleware-first, then routes.
 const { startBot } = require("./telegram");
 const authRoutes   = require("./auth");
-const brands       = require("./brands");         // Task #5 — Brand Swap
-const simpleSearch = require("./simple-search");  // Task #5 — Simple Mode
-const tradeData    = require("./trade-data");     // Task #4 — Real data
-const agents       = require("./agents");         // AI Agent Suite
+const brands       = require("./brands");             // Task #5 — Brand Swap
+const simpleSearch = require("./simple-search");      // Task #5 — Simple Mode
+const cloudflare   = require("./cloudflare-domains"); // Task #5 — Custom hostname SSL
+const tradeData    = require("./trade-data");         // Task #4 — Real data
+const agents       = require("./agents");             // AI Agent Suite
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use(brands.hostMiddleware);
 app.use("/auth", authRoutes);
 app.use(brands.router);          // /api/brand, /auth/admin/brands*
 app.use(simpleSearch.router);    // /api/simple-search*
+app.use(cloudflare.router);      // /api/cloudflare/*, /auth/admin/brands/*/domains/*/provision-ssl
 app.use(tradeData.router);       // /api/trade-data
 app.use(agents.router);          // /api/agent*
 

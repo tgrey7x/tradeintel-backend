@@ -35,17 +35,29 @@ Phase 1B Sprint — Login UI, Admin Console, Stripe, Real Data APIs, Simple Mode
 
 ## File Structure
 
-- server.js — thin wire-up: middleware + router mounts only (per Modular rule)
-- index.html — Bloomberg-dark terminal frontend (crown jewel — do not edit without backup)
+- server.js — thin wire-up: middleware + router mounts only (101 lines, per Modular rule)
+- index.html — Bloomberg-dark terminal frontend (crown jewel — DENY-LISTED in .claude/settings.json)
+- admin.html / login.html — auth + admin console UIs (crown jewels — also DENY-LISTED)
 - simple.html — Task #5 Simple Mode search UI (isolated from index.html)
-- login.html / admin.html — auth and admin console UIs
+- admin-brands.html — Task #5 isolated admin page for brand + custom domain CRUD
 - telegram.js — 14-command Telegram admin bot module
 - auth.js — Auth + admin RBAC routes module
-- brands.js — Task #5 Brand Swap + Custom Domain module (host middleware, brand/domain CRUD)
-- simple-search.js — Task #5 Simple Mode AI search module (POST /api/simple-search)
+- brands.js — Task #5 Brand Swap + Custom Domain module (host middleware, brand/domain CRUD, DNS verification)
+- simple-search.js — Task #5 Simple Mode AI search module (POST /api/simple-search, health diagnostic)
+- cloudflare-domains.js — Task #5 Cloudflare SaaS custom hostname SSL provisioning module (degrades gracefully without env vars)
+- trade-data.js — Task #4 World Bank + US Census trade data module (extracted from server.js)
+- agents.js — 5-agent Claude API router (extracted from server.js)
 - db.js — Supabase connection (public + admin clients)
+- lib/ — dependency-free pure helpers (imported by modules + tests)
+  - normalize-host.js — normalizeHost() + isValidHostname()
+  - clean-json.js — cleanJsonResponse() + safeJsonParse() (LLM response handling)
+  - fmt-billion.js — fmtBillion() currency formatter
+- tests/ — Node built-in test runner (`npm test`)
+  - unit.test.js — 24 tests covering all lib/ helpers (all passing)
 - migrations/ — numbered SQL migrations to run in Supabase SQL editor
   - 001_brands.sql — brands + custom_domains tables + RLS
+- .claude/settings.json — autonomous-mode config (allow/deny/ask permissions + syntax-check hooks)
+- TASK5_SETUP.md — step-by-step setup guide for Task #5 (migration, deploy, smoke tests)
 - .env — Local only, never in repo
 - CLAUDE.md — This file
 
@@ -63,8 +75,18 @@ Phase 1B Sprint — Login UI, Admin Console, Stripe, Real Data APIs, Simple Mode
 3. Stripe payments + subscription gating — OPEN
 4. Real trade data APIs (USATrade, UN Comtrade, CBP) — IN PROGRESS
 5. Simple Mode AI search + brand swap + custom domain — IN PROGRESS
-   - Scaffold landed: `brands.js`, `simple-search.js`, `simple.html`, `migrations/001_brands.sql`
-   - TODO: run migration in Supabase, build Admin Console "Brands" section, DNS verification end-to-end test, Cloudflare custom-hostname wiring
+   - ✅ Scaffold landed: `brands.js`, `simple-search.js`, `simple.html`, `migrations/001_brands.sql`
+   - ✅ Admin Brands UI: `admin-brands.html` (isolated, does not touch admin.html)
+   - ✅ Simple Mode health diagnostic: `/api/simple-search/health` (zero token cost)
+   - ✅ Cloudflare SSL module landed: `cloudflare-domains.js` (degrades gracefully, needs CLOUDFLARE_API_TOKEN + CLOUDFLARE_ZONE_ID in Railway to activate)
+   - TODO: run `migrations/001_brands.sql` in Supabase, deploy to Railway, set Cloudflare env vars, end-to-end test DNS verification + SSL provisioning
+
+## Parallel Infrastructure Work (Complete)
+
+- ✅ **Modular refactor**: `server.js` reduced from ~400 lines to 101. Trade data extracted into `trade-data.js` (278 lines), agents extracted into `agents.js` (98 lines). Zero business logic in server.js.
+- ✅ **Pure-helper lib/**: `lib/normalize-host.js`, `lib/clean-json.js`, `lib/fmt-billion.js` — dependency-free, imported by modules and tests.
+- ✅ **Unit tests**: `tests/unit.test.js` — 24 tests covering all lib/ helpers, all passing. Uses Node's built-in test runner (`node --test`). `npm test` works with zero new dependencies.
+- ✅ **Autonomous mode config**: `.claude/settings.json` — 39 allow / 23 deny / 12 ask permission rules + 2 syntax-check hooks (PostToolUse on .js edits, PreToolUse on git commit). Crown-jewel files hard-denied at the harness level. Pipe-tested.
 
 ## Sync Protocol
 
